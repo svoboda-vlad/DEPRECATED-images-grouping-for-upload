@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import * as moment from 'moment';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ImagesGroupingComponent implements OnInit {
 
-  fileNames: string[] = [];
+  files: File[] = [];
 
   constructor() { }
 
@@ -17,16 +18,28 @@ export class ImagesGroupingComponent implements OnInit {
 
   processFiles(files: FileList): void {
     if(files.length > 0) {
-      this.fileNames = this.getFileNames(files);
+      this.files = this.getFiles(files);
     }
   }
 
-  getFileNames(files: FileList): string[] {
-    let fileNames: string[] = [];
+  getFiles(files: FileList): File[] {
+    let filesArray: File[] = [];
     for (let i = 0; i < files.length; i++) {
-      fileNames[i] = files.item(i).name;
+      const file = files.item(i);
+      filesArray.push(
+        new File(file.name, moment(file.name, "YYYYMMDD HHmmss"))
+      );
     }
-    return fileNames;
+    return filesArray;
   }
 
+}
+
+export interface IFile {
+  name: string;
+  dateTime: moment.Moment;
+}
+
+export class File implements IFile {
+  constructor(public name: string, public dateTime: moment.Moment) {}
 }
