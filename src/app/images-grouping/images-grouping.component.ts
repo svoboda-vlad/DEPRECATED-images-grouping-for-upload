@@ -10,6 +10,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   files: IFile[] = [];
   filesSequence: IFilesSequence[] = [];
+  timeDiffDuplicate = 10;
 
   constructor() { }
 
@@ -43,6 +44,7 @@ export class ImagesGroupingComponent implements OnInit {
       sequence.push(new FilesSequence(file, i++, 0));
     });
     sequence = this.calculateTimeDiff(sequence);
+    sequence = this.identifyDuplicates(sequence);
     return sequence;
   }
 
@@ -53,6 +55,15 @@ export class ImagesGroupingComponent implements OnInit {
       } else {
         const prevSeq = sequence.find((s) => s.seqNo === (seq.seqNo - 1));
         seq.timeDiff = seq.file.dateTime.diff(prevSeq.file.dateTime, 'second');
+      }
+    });
+    return sequence;
+  }
+
+  identifyDuplicates(sequence: IFilesSequence[]): IFilesSequence[] {
+    sequence.forEach((seq) => {
+      if(seq.seqNo > 1) {
+        if(seq.timeDiff <= this.timeDiffDuplicate) seq.isDuplicate = YesNo.Y;
       }
     });
     return sequence;
@@ -73,8 +84,14 @@ export interface IFilesSequence {
   file: IFile;
   seqNo: number;
   timeDiff: number;
+  isDuplicate?: YesNo;
 }
 
 export class FilesSequence {
-  constructor(public file: IFile, public seqNo: number, public timeDiff: number) {}
+  constructor(public file: IFile, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) {}
+}
+
+export const enum YesNo {
+  Y = 'Y',
+  N = 'N'
 }

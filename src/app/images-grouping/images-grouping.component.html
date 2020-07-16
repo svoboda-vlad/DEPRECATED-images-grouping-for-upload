@@ -2,5 +2,5 @@
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
 <p>Files:</p>
 <div *ngFor="let seq of filesSequence">
-  <span>{{ seq.seqNo }}, {{ seq.file.name }}, {{ seq.file.dateTime| date:'yyyy-MM-dd HH:mm' }}, {{ seq.timeDiff }} </span><br/>
+  <span>{{ seq.seqNo }}, {{ seq.file.name }}, {{ seq.file.dateTime| date:'yyyy-MM-dd HH:mm' }}, {{ seq.timeDiff }}, {{ seq.isDuplicate }} </span><br/>
 </div>
