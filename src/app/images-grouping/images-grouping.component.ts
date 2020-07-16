@@ -8,7 +8,8 @@ import * as moment from 'moment';
 })
 export class ImagesGroupingComponent implements OnInit {
 
-  files: File[] = [];
+  files: IFile[] = [];
+  filesSequence: IFilesSequence[] = [];
 
   constructor() { }
 
@@ -19,6 +20,7 @@ export class ImagesGroupingComponent implements OnInit {
   processFiles(files: FileList): void {
     if(files.length > 0) {
       this.files = this.getFiles(files);
+      this.filesSequence = this.getFilesSequence(this.files);
     }
   }
 
@@ -33,6 +35,29 @@ export class ImagesGroupingComponent implements OnInit {
     return filesArray;
   }
 
+  getFilesSequence(files: IFile[]): IFilesSequence[] {
+    let sequence: IFilesSequence[] = [];
+    files.sort();
+    let i = 1;
+    files.forEach((file) => {
+      sequence.push(new FilesSequence(file, i++, 0));
+    });
+    sequence = this.calculateTimeDiff(sequence);
+    return sequence;
+  }
+
+  calculateTimeDiff(sequence: IFilesSequence[]): IFilesSequence[] {
+    sequence.forEach((seq) => {
+      if(seq.seqNo === 1) {
+        seq.timeDiff = 0;
+      } else {
+        const prevSeq = sequence.find((s) => s.seqNo === (seq.seqNo - 1));
+        seq.timeDiff = seq.file.dateTime.diff(prevSeq.file.dateTime, 'second');
+      }
+    });
+    return sequence;
+  }
+
 }
 
 export interface IFile {
@@ -42,4 +67,14 @@ export interface IFile {
 
 export class File implements IFile {
   constructor(public name: string, public dateTime: moment.Moment) {}
+}
+
+export interface IFilesSequence {
+  file: IFile;
+  seqNo: number;
+  timeDiff: number;
+}
+
+export class FilesSequence {
+  constructor(public file: IFile, public seqNo: number, public timeDiff: number) {}
 }
