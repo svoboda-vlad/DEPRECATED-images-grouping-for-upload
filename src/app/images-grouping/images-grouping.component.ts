@@ -11,6 +11,9 @@ export class ImagesGroupingComponent implements OnInit {
   files: IFile[] = [];
   filesSequence: IFilesSequence[] = [];
   timeDiffDuplicate = 10;
+  filesGroups: IFilesGroup[] = [];
+  timeDiffGroup = 3600;
+  totalFilesCount = 0;
 
   constructor() { }
 
@@ -22,6 +25,8 @@ export class ImagesGroupingComponent implements OnInit {
     if(files.length > 0) {
       this.files = this.getFiles(files);
       this.filesSequence = this.getFilesSequence(this.files);
+      this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
+      this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
     }
   }
 
@@ -69,6 +74,46 @@ export class ImagesGroupingComponent implements OnInit {
     return sequence;
   }
 
+  removeDuplicates(sequence: IFilesSequence[]): IFilesSequence[] {
+    return sequence.filter((seq) => seq.isDuplicate === YesNo.N);
+  }
+
+  identifyGroups(sequence: IFilesSequence[]): IFilesGroup[] {
+    const groups: IFilesGroup[] = [];
+    let group: IFilesGroup;
+    sequence.forEach((seq,i) => {
+      // if the first file in the sequence, create a new group
+      if (i === 0) {
+        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq.file]);
+      // if the last file in the sequence, add the file to the group, update end time and add current group
+      } else if ((i + 1) === sequence.length) {
+        group.files.push(seq.file);
+        group.endTime = seq.file.dateTime;
+        groups.push(group);
+      // if not the first neither the last file
+      } else {
+        // if a new group is identified, add current group and create a new group
+        if (seq.timeDiff > this.timeDiffGroup) {
+          groups.push(group);
+          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq.file]);
+        // if existing group, add the file to the group and update end time
+        } else {
+          group.files.push(seq.file);
+          group.endTime = seq.file.dateTime;
+        }
+      }
+    });
+    return groups;
+  }
+
+  getTotalFilesCount(groups: IFilesGroup[]): number {
+    let count: number = 0;
+    groups.forEach((group) => {
+      count += group.files.length;
+    })
+    return count;
+  }
+
 }
 
 export interface IFile {
@@ -87,11 +132,21 @@ export interface IFilesSequence {
   isDuplicate?: YesNo;
 }
 
-export class FilesSequence {
+export class FilesSequence implements IFilesSequence {
   constructor(public file: IFile, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) {}
 }
 
 export const enum YesNo {
   Y = 'Y',
   N = 'N'
+}
+
+export interface IFilesGroup {
+  startTime: moment.Moment;
+  endTime: moment.Moment;
+  files: IFile[];
+}
+
+export class FilesGroup implements IFilesGroup {
+  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public files: IFile[]) {}
 }
