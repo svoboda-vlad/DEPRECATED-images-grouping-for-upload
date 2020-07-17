@@ -22,31 +22,50 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   processFiles(files: FileList): void {
+    this.files = [];
     if(files.length > 0) {
-      this.files = this.getFiles(files);
-      this.filesSequence = this.getFilesSequence(this.files);
-      this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
-      this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
+      this.getFiles(files);
     }
   }
 
-  getFiles(files: FileList): File[] {
-    let filesArray: File[] = [];
+  getFiles(files: FileList) {
+    const filesList: any[] = [];
     for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      filesArray.push(
-        new File(file.name, moment(file.name, "YYYYMMDD HHmmss"))
-      );
+      filesList[i] = files.item(i);
     }
-    return filesArray;
+    filesList.forEach((file, i) => {
+      let reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (_event) => {
+        this.files.push(
+          new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result)
+        );
+        if((i + 1) === files.length) {
+          this.filesSequence = this.getFilesSequence(this.files);
+          this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
+          this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
+        }
+      }
+    });
   }
 
   getFilesSequence(files: IFile[]): IFilesSequence[] {
     let sequence: IFilesSequence[] = [];
-    files.sort();
-    let i = 1;
-    files.forEach((file) => {
-      sequence.push(new FilesSequence(file, i++, 0));
+    files.sort((a, b) => {
+      let nameA = a.name.toUpperCase(); // ignore upper and lowercase
+      let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+
+      // names must be equal
+      return 0;
+    });
+    files.forEach((file, i) => {
+      sequence.push(new FilesSequence(file, i + 1, 0));
     });
     sequence = this.calculateTimeDiff(sequence);
     sequence = this.identifyDuplicates(sequence);
@@ -118,10 +137,11 @@ export class ImagesGroupingComponent implements OnInit {
 export interface IFile {
   name: string;
   dateTime: moment.Moment;
+  imageContent: string | ArrayBuffer;
 }
 
 export class File implements IFile {
-  constructor(public name: string, public dateTime: moment.Moment) {}
+  constructor(public name: string, public dateTime: moment.Moment, public imageContent: string | ArrayBuffer) {}
 }
 
 export interface IFilesSequence {

@@ -5,6 +5,7 @@
 <div *ngFor="let group of filesGroups">
   <div><b>{{ group.startTime | date:'yyyy-MM-dd HH:mm EEEE' }} - {{group.files.length}} files</b></div>
   <div *ngFor="let file of group.files">
-  <div>{{ file.name }} </div>
+    <div>{{ file.name }} </div>
+    <img [src]="file.imageContent" height="200">
   </div>
 </div>
