@@ -85,12 +85,7 @@ export class ImagesGroupingComponent implements OnInit {
       // if the first file in the sequence, create a new group
       if (i === 0) {
         group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq.file]);
-      // if the last file in the sequence, add the file to the group, update end time and add current group
-      } else if ((i + 1) === sequence.length) {
-        group.files.push(seq.file);
-        group.endTime = seq.file.dateTime;
-        groups.push(group);
-      // if not the first neither the last file
+      // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
         if (seq.timeDiff > this.timeDiffGroup) {
@@ -101,6 +96,10 @@ export class ImagesGroupingComponent implements OnInit {
           group.files.push(seq.file);
           group.endTime = seq.file.dateTime;
         }
+      }
+      // if the last file in the sequence, add current group
+      if ((i + 1) === sequence.length) {
+        groups.push(group);
       }
     });
     return groups;
