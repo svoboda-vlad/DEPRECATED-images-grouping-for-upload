@@ -10,7 +10,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   files: IFile[] = [];
   filesSequence: IFilesSequence[] = [];
-  timeDiffDuplicate = 10;
+  timeDiffDuplicate = 20;
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
   totalFilesCount = 0;

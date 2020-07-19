@@ -4,8 +4,10 @@
 <p *ngIf="totalFilesCount > 0">{{totalFilesCount}} files without duplicates in {{filesGroups.length}} groups</p>
 <div *ngFor="let group of filesGroups">
   <div><b>{{ group.startTime | date:'yyyy-MM-dd HH:mm EEEE' }} - {{group.files.length}} files</b></div>
-  <div *ngFor="let file of group.files">
-    <div>{{ file.name }} </div>
-    <img [src]="file.imageContent" height="200">
+  <div class="group">
+    <div class="file" *ngFor="let file of group.files">
+      {{ file.dateTime | date:'HH:mm:ss' }}<br/>
+      <img class="img" [src]="file.imageContent">
+    </div>
   </div>
 </div>
