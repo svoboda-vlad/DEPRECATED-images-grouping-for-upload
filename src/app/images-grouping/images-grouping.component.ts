@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
-import { NgxPicaCompressOptionsInterface, NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
+import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -30,14 +30,6 @@ export class ImagesGroupingComponent implements OnInit {
     if(files.length > 0) {
       this.getFiles(files);
     }
-  }
-
-  getFilesArray(files: FileList): any[] {
-    const filesList: any[] = [];
-    for (let i = 0; i < files.length; i++) {
-      filesList[i] = files.item(i);
-    }
-    return filesList;
   }
 
   getFiles(filesList) {
