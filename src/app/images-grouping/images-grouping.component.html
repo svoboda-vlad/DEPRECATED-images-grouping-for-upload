@@ -3,11 +3,11 @@
 <p *ngIf="files.length > 0">{{files.length}} files in total</p>
 <p *ngIf="totalFilesCount > 0">{{totalFilesCount}} files without duplicates in {{filesGroups.length}} groups</p>
 <div *ngFor="let group of filesGroups">
-  <div><b>{{ group.startTime | date:'yyyy-MM-dd HH:mm EEEE' }} - {{group.files.length}} files</b></div>
+  <div><b>{{ group.startTime | date:'yyyy-MM-dd HH:mm EEEE' }} - {{group.getCountWithoutDuplicates()}} unique files (of {{group.sequence.length}})</b></div>
   <div class="group">
-    <div class="file" *ngFor="let file of group.files">
-      {{ file.dateTime | date:'HH:mm:ss' }}<br/>
-      <img class="img" [src]="file.imageContent">
+    <div class="file" *ngFor="let seq of group.sequence">
+      {{ seq.file.dateTime | date:'HH:mm:ss' }}<br/>
+      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent">
     </div>
   </div>
 </div>

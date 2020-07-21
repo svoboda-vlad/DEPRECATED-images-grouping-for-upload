@@ -12,7 +12,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   files: IFile[] = [];
   filesSequence: IFilesSequence[] = [];
-  timeDiffDuplicate = 20;
+  timeDiffDuplicate = 10;
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
   totalFilesCount = 0;
@@ -24,15 +24,17 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   processFiles(files: FileList): void {
-    this.files = [];
-    this.filesSequence = [];
-    this.filesGroups = [];
     if(files.length > 0) {
       this.getFiles(files);
     }
   }
 
   getFiles(filesList) {
+    this.files = [];
+    this.filesSequence = [];
+    this.filesGroups = [];
+    this.totalFilesCount = 0;
+
     const options: NgxPicaResizeOptionsInterface = {
       exifOptions: {
         forceExifOrientation: true
@@ -50,7 +52,8 @@ export class ImagesGroupingComponent implements OnInit {
             this.files.push(new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result));
             if((i + 1) === filesList.length) {
               this.filesSequence = this.getFilesSequence(this.files);
-              this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
+              // this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
+              this.filesGroups = this.identifyGroups(this.filesSequence);
               this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
             }
             i++;
@@ -117,16 +120,16 @@ export class ImagesGroupingComponent implements OnInit {
     sequence.forEach((seq,i) => {
       // if the first file in the sequence, create a new group
       if (i === 0) {
-        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq.file]);
+        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
       // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
         if (seq.timeDiff > this.timeDiffGroup) {
           groups.push(group);
-          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq.file]);
+          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
         // if existing group, add the file to the group and update end time
         } else {
-          group.files.push(seq.file);
+          group.sequence.push(seq);
           group.endTime = seq.file.dateTime;
         }
       }
@@ -141,7 +144,7 @@ export class ImagesGroupingComponent implements OnInit {
   getTotalFilesCount(groups: IFilesGroup[]): number {
     let count: number = 0;
     groups.forEach((group) => {
-      count += group.files.length;
+      count += group.sequence.length;
     })
     return count;
   }
@@ -177,9 +180,15 @@ export const enum YesNo {
 export interface IFilesGroup {
   startTime: moment.Moment;
   endTime: moment.Moment;
-  files: IFile[];
+  sequence: IFilesSequence[];
+
+  getCountWithoutDuplicates(): number;
 }
 
 export class FilesGroup implements IFilesGroup {
-  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public files: IFile[]) {}
+  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[]) {}
+
+  getCountWithoutDuplicates(): number {
+    return this.sequence.filter((seq) => seq.isDuplicate === YesNo.N).length;
+  }
 }
