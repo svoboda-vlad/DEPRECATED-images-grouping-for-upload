@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ImagesGroupingComponent } from './images-grouping/images-grouping.component';
+import { NgxPicaModule } from '@digitalascetic/ngx-pica';
 
 @NgModule({
   declarations: [
@@ -12,7 +13,8 @@ import { ImagesGroupingComponent } from './images-grouping/images-grouping.compo
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgxPicaModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -19,7 +19,10 @@
     "@angular/platform-browser": "~9.1.9",
     "@angular/platform-browser-dynamic": "~9.1.9",
     "@angular/router": "~9.1.9",
+    "@digitalascetic/ngx-pica": "^10.0.0",
+    "exifr": "^5.0.2",
     "moment": "^2.27.0",
+    "pica": "^6.1.0",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
