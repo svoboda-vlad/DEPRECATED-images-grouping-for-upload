@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
+import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
+import { NgxPicaCompressOptionsInterface, NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -15,7 +17,7 @@ export class ImagesGroupingComponent implements OnInit {
   timeDiffGroup = 3600;
   totalFilesCount = 0;
 
-  constructor() { }
+  constructor(private ngxPicaService: NgxPicaService) { }
 
   ngOnInit(): void {
 
@@ -23,29 +25,49 @@ export class ImagesGroupingComponent implements OnInit {
 
   processFiles(files: FileList): void {
     this.files = [];
+    this.filesSequence = [];
+    this.filesGroups = [];
     if(files.length > 0) {
       this.getFiles(files);
     }
   }
 
-  getFiles(files: FileList) {
+  getFilesArray(files: FileList): any[] {
     const filesList: any[] = [];
     for (let i = 0; i < files.length; i++) {
       filesList[i] = files.item(i);
     }
-    filesList.forEach((file, i) => {
-      let reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (_event) => {
-        this.files.push(
-          new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result)
-        );
-        if((i + 1) === files.length) {
-          this.filesSequence = this.getFilesSequence(this.files);
-          this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
-          this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
-        }
+    return filesList;
+  }
+
+  getFiles(filesList) {
+    const options: NgxPicaResizeOptionsInterface = {
+      exifOptions: {
+        forceExifOrientation: true
+      },
+      aspectRatio: {
+        keepAspectRatio: true
       }
+    };
+
+    let i = 0;
+    this.ngxPicaService.resizeImages(filesList, 800, 800, options)
+    .subscribe((file) => {
+        let reader: FileReader = new FileReader();
+        reader.addEventListener('load', (event: any) => {
+            this.files.push(new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result));
+            if((i + 1) === filesList.length) {
+              this.filesSequence = this.getFilesSequence(this.files);
+              this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
+              this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
+            }
+            i++;
+        }, false);
+
+        reader.readAsDataURL(file);
+
+    }, (err: NgxPicaErrorInterface) => {
+        throw err.err;
     });
   }
 
