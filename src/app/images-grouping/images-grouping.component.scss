@@ -17,3 +17,18 @@
   // filter: grayscale(100%);
   max-width: 50px;
 }
+
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid lightgrey;
+  padding: 5px;
+}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+}
