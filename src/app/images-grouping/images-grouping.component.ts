@@ -16,6 +16,7 @@ export class ImagesGroupingComponent implements OnInit {
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
   totalFilesCount = 0;
+  uniqueFilesCount = 0;
 
   constructor(private ngxPicaService: NgxPicaService) { }
 
@@ -54,7 +55,7 @@ export class ImagesGroupingComponent implements OnInit {
               this.filesSequence = this.getFilesSequence(this.files);
               // this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
               this.filesGroups = this.identifyGroups(this.filesSequence);
-              this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
+              this.getTotalFilesCount(this.filesGroups);
             }
             i++;
         }, false);
@@ -117,16 +118,17 @@ export class ImagesGroupingComponent implements OnInit {
   identifyGroups(sequence: IFilesSequence[]): IFilesGroup[] {
     const groups: IFilesGroup[] = [];
     let group: IFilesGroup;
-    sequence.forEach((seq,i) => {
+    sequence.forEach((seq, i) => {
+      const groupName: string = seq.file.dateTime.format('YYYY-MM-DD HH:mm dddd');
       // if the first file in the sequence, create a new group
       if (i === 0) {
-        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
+        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq], groupName);
       // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
         if (seq.timeDiff > this.timeDiffGroup) {
           groups.push(group);
-          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
+          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq], groupName);
         // if existing group, add the file to the group and update end time
         } else {
           group.sequence.push(seq);
@@ -141,12 +143,19 @@ export class ImagesGroupingComponent implements OnInit {
     return groups;
   }
 
-  getTotalFilesCount(groups: IFilesGroup[]): number {
-    let count: number = 0;
+  getTotalFilesCount(groups: IFilesGroup[]): void {
+    this.totalFilesCount = 0;
+    this.uniqueFilesCount = 0;
     groups.forEach((group) => {
-      count += group.sequence.length;
+      this.totalFilesCount += group.sequence.length;
+      this.uniqueFilesCount += group.getCountWithoutDuplicates();
     })
-    return count;
+  }
+
+  getDaysDiffFromToday(groupDate: moment.Moment): number {
+    const todayDay = moment(moment().format('YYYY-MM-DD'));
+    const groupDateDay = moment(groupDate.format('YYYY-MM-DD'));
+    return groupDateDay.diff(todayDay, 'days');
   }
 
 }
@@ -181,12 +190,13 @@ export interface IFilesGroup {
   startTime: moment.Moment;
   endTime: moment.Moment;
   sequence: IFilesSequence[];
+  name: string;
 
   getCountWithoutDuplicates(): number;
 }
 
 export class FilesGroup implements IFilesGroup {
-  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[]) {}
+  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[], public name: string) {}
 
   getCountWithoutDuplicates(): number {
     return this.sequence.filter((seq) => seq.isDuplicate === YesNo.N).length;
