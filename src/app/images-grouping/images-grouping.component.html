@@ -1,7 +1,7 @@
 <h2>Grouping Images</h2>
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
 <p *ngIf="files.length > 0">{{files.length}} files in total</p>
-<p *ngIf="uniqueFilesCount > 0">{{uniqueFilesCount}} files without duplicates in {{filesGroups.length}} groups</p>
+<p *ngIf="getUniqueFilesCount() > 0">{{getUniqueFilesCount()}} files without duplicates in {{filesGroups.length}} groups</p>
 
 <table *ngIf="filesGroups.length > 0">
   <th>Group</th>
@@ -19,7 +19,8 @@
   <div class="group">
     <div class="file" *ngFor="let seq of group.sequence">
       {{ seq.file.dateTime | date:'HH:mm:ss' }}<br/>
-      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent">
+      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent"><br/>
+      <button (click)="changeIsDuplicate(group, seq)">{{seq.isDuplicate === 'Y' ? 'Add' : 'Remove'}}</button>
     </div>
   </div>
 </div>

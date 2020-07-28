@@ -15,8 +15,6 @@ export class ImagesGroupingComponent implements OnInit {
   timeDiffDuplicate = 10;
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
-  totalFilesCount = 0;
-  uniqueFilesCount = 0;
 
   constructor(private ngxPicaService: NgxPicaService) { }
 
@@ -34,7 +32,6 @@ export class ImagesGroupingComponent implements OnInit {
     this.files = [];
     this.filesSequence = [];
     this.filesGroups = [];
-    this.totalFilesCount = 0;
 
     const options: NgxPicaResizeOptionsInterface = {
       exifOptions: {
@@ -55,7 +52,6 @@ export class ImagesGroupingComponent implements OnInit {
               this.filesSequence = this.getFilesSequence(this.files);
               // this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
               this.filesGroups = this.identifyGroups(this.filesSequence);
-              this.getTotalFilesCount(this.filesGroups);
             }
             i++;
         }, false);
@@ -146,13 +142,12 @@ export class ImagesGroupingComponent implements OnInit {
     return groups;
   }
 
-  getTotalFilesCount(groups: IFilesGroup[]): void {
-    this.totalFilesCount = 0;
-    this.uniqueFilesCount = 0;
-    groups.forEach((group) => {
-      this.totalFilesCount += group.sequence.length;
-      this.uniqueFilesCount += group.getCountWithoutDuplicates();
+  getUniqueFilesCount(): number {
+    let uniqueFilesCount = 0;
+    this.filesGroups.forEach((group) => {
+      uniqueFilesCount += group.getCountWithoutDuplicates();
     })
+    return uniqueFilesCount;
   }
 
   getDaysDiffFromToday(groupDate: moment.Moment): number {
@@ -165,6 +160,18 @@ export class ImagesGroupingComponent implements OnInit {
     this.filesGroups.forEach((group) => {
       if(group.id === gr.id) {
         group.name = newName;
+      }
+    });
+  }
+
+  changeIsDuplicate(gr: IFilesGroup, seq: IFilesSequence) {
+    this.filesGroups.forEach((group) => {
+      if(group.id === gr.id) {
+        group.sequence.forEach((sequence) => {
+          if(sequence.seqNo === seq.seqNo) {
+            seq.isDuplicate = (seq.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
+          }
+        });
       }
     });
   }
