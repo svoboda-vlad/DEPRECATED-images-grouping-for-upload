@@ -8,7 +8,7 @@
   <th>Files</th>
   <th>Days</th>
   <tr *ngFor="let group of filesGroups">
-    <td>{{ group.name }}</td>
+    <td #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</td>
     <td>{{ group.getCountWithoutDuplicates() }}</td>
     <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
   </tr>
