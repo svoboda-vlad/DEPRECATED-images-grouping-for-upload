@@ -116,7 +116,8 @@ export class ImagesGroupingComponent implements OnInit {
     let group: IFilesGroup;
     let id = 1;
     sequence.forEach((seq, i) => {
-      const groupName: string = seq.file.dateTime.format('YYYY-MM-DD HH:mm dddd');
+      let groupName: string = seq.file.dateTime.format('YYYY-MM-DD dddd HH').concat('h');
+      groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
       if (i === 0) {
         group = new FilesGroup(id, seq.file.dateTime, seq.file.dateTime,[seq], groupName);
@@ -174,6 +175,16 @@ export class ImagesGroupingComponent implements OnInit {
         });
       }
     });
+  }
+
+  translateWeekdayNamesToCzech(name: string) : string {
+    return name.replace("Monday","pondělí")
+    .replace("Tuesday","úterý")
+    .replace("Wednesday","středa")
+    .replace("Thursday","čtvrtek")
+    .replace("Friday","pátek")
+    .replace("Saturday","sobota")
+    .replace("Sunday","neděle");
   }
 
 }
