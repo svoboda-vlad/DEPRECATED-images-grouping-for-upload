@@ -169,6 +169,18 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
+  changeIsDuplicate(gr: IFilesGroup, seq: IFilesSequence) {
+    this.filesGroups.forEach((group) => {
+      if(group.id === gr.id) {
+        group.sequence.forEach((sequence) => {
+          if(sequence.seqNo === seq.seqNo) {
+            seq.isDuplicate = (seq.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
+          }
+        });
+      }
+    });
+  }
+
 }
 
 export interface IFile {

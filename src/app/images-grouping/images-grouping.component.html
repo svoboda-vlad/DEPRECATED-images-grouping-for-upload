@@ -19,7 +19,8 @@
   <div class="group">
     <div class="file" *ngFor="let seq of group.sequence">
       {{ seq.file.dateTime | date:'HH:mm:ss' }}<br/>
-      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent">
+      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent"><br/>
+      <button (click)="changeIsDuplicate(group, seq)">{{seq.isDuplicate === 'Y' ? 'Add' : 'Remove'}}</button>
     </div>
   </div>
 </div>
