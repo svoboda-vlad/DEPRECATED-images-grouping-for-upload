@@ -15,7 +15,6 @@ export class ImagesGroupingComponent implements OnInit {
   timeDiffDuplicate = 10;
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
-  totalFilesCount = 0;
 
   constructor(private ngxPicaService: NgxPicaService) { }
 
@@ -33,7 +32,6 @@ export class ImagesGroupingComponent implements OnInit {
     this.files = [];
     this.filesSequence = [];
     this.filesGroups = [];
-    this.totalFilesCount = 0;
 
     const options: NgxPicaResizeOptionsInterface = {
       exifOptions: {
@@ -54,7 +52,6 @@ export class ImagesGroupingComponent implements OnInit {
               this.filesSequence = this.getFilesSequence(this.files);
               // this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
               this.filesGroups = this.identifyGroups(this.filesSequence);
-              this.totalFilesCount = this.getTotalFilesCount(this.filesGroups);
             }
             i++;
         }, false);
@@ -117,16 +114,20 @@ export class ImagesGroupingComponent implements OnInit {
   identifyGroups(sequence: IFilesSequence[]): IFilesGroup[] {
     const groups: IFilesGroup[] = [];
     let group: IFilesGroup;
-    sequence.forEach((seq,i) => {
+    let id = 1;
+    sequence.forEach((seq, i) => {
+      const groupName: string = seq.file.dateTime.format('YYYY-MM-DD HH:mm dddd');
       // if the first file in the sequence, create a new group
       if (i === 0) {
-        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
+        group = new FilesGroup(id, seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+        id++;
       // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
         if (seq.timeDiff > this.timeDiffGroup) {
           groups.push(group);
-          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq]);
+          group = new FilesGroup(id,seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+          id++;
         // if existing group, add the file to the group and update end time
         } else {
           group.sequence.push(seq);
@@ -141,12 +142,38 @@ export class ImagesGroupingComponent implements OnInit {
     return groups;
   }
 
-  getTotalFilesCount(groups: IFilesGroup[]): number {
-    let count: number = 0;
-    groups.forEach((group) => {
-      count += group.sequence.length;
+  getUniqueFilesCount(): number {
+    let uniqueFilesCount = 0;
+    this.filesGroups.forEach((group) => {
+      uniqueFilesCount += group.getCountWithoutDuplicates();
     })
-    return count;
+    return uniqueFilesCount;
+  }
+
+  getDaysDiffFromToday(groupDate: moment.Moment): number {
+    const todayDay = moment(moment().format('YYYY-MM-DD'));
+    const groupDateDay = moment(groupDate.format('YYYY-MM-DD'));
+    return groupDateDay.diff(todayDay, 'days');
+  }
+
+  updateGroupName(gr: IFilesGroup, newName: string) {
+    this.filesGroups.forEach((group) => {
+      if(group.id === gr.id) {
+        group.name = newName;
+      }
+    });
+  }
+
+  changeIsDuplicate(gr: IFilesGroup, seq: IFilesSequence) {
+    this.filesGroups.forEach((group) => {
+      if(group.id === gr.id) {
+        group.sequence.forEach((sequence) => {
+          if(sequence.seqNo === seq.seqNo) {
+            seq.isDuplicate = (seq.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
+          }
+        });
+      }
+    });
   }
 
 }
@@ -178,15 +205,17 @@ export const enum YesNo {
 }
 
 export interface IFilesGroup {
+  id: number;
   startTime: moment.Moment;
   endTime: moment.Moment;
   sequence: IFilesSequence[];
+  name: string;
 
   getCountWithoutDuplicates(): number;
 }
 
 export class FilesGroup implements IFilesGroup {
-  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[]) {}
+  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[], public name: string) {}
 
   getCountWithoutDuplicates(): number {
     return this.sequence.filter((seq) => seq.isDuplicate === YesNo.N).length;
