@@ -118,17 +118,20 @@ export class ImagesGroupingComponent implements OnInit {
   identifyGroups(sequence: IFilesSequence[]): IFilesGroup[] {
     const groups: IFilesGroup[] = [];
     let group: IFilesGroup;
+    let id = 1;
     sequence.forEach((seq, i) => {
       const groupName: string = seq.file.dateTime.format('YYYY-MM-DD HH:mm dddd');
       // if the first file in the sequence, create a new group
       if (i === 0) {
-        group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+        group = new FilesGroup(id, seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+        id++;
       // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
         if (seq.timeDiff > this.timeDiffGroup) {
           groups.push(group);
-          group = new FilesGroup(seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+          group = new FilesGroup(id,seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+          id++;
         // if existing group, add the file to the group and update end time
         } else {
           group.sequence.push(seq);
@@ -156,6 +159,14 @@ export class ImagesGroupingComponent implements OnInit {
     const todayDay = moment(moment().format('YYYY-MM-DD'));
     const groupDateDay = moment(groupDate.format('YYYY-MM-DD'));
     return groupDateDay.diff(todayDay, 'days');
+  }
+
+  updateGroupName(gr: IFilesGroup, newName: string) {
+    this.filesGroups.forEach((group) => {
+      if(group.id === gr.id) {
+        group.name = newName;
+      }
+    });
   }
 
 }
@@ -187,6 +198,7 @@ export const enum YesNo {
 }
 
 export interface IFilesGroup {
+  id: number;
   startTime: moment.Moment;
   endTime: moment.Moment;
   sequence: IFilesSequence[];
@@ -196,7 +208,7 @@ export interface IFilesGroup {
 }
 
 export class FilesGroup implements IFilesGroup {
-  constructor(public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[], public name: string) {}
+  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[], public name: string) {}
 
   getCountWithoutDuplicates(): number {
     return this.sequence.filter((seq) => seq.isDuplicate === YesNo.N).length;
