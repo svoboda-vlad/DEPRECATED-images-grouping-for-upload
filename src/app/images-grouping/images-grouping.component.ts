@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+
+const token = 'ya29.a0AfH6SMBoH3Cv8xaECEqmn6N1vN3HD1Vhjxml35Bujrr0Hchwvho5z88JK-fklb6FBmP72o1NFXRblSFa0h6aeOgWCTuZ0LnPLYA84HAVMenQOs0YElRCc-kCdZTHxEOpp9X53rMqiv-_Rge4EiMbJ_rKkT9MW7_TzxE9';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -16,7 +19,7 @@ export class ImagesGroupingComponent implements OnInit {
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
 
-  constructor(private ngxPicaService: NgxPicaService) { }
+  constructor(private ngxPicaService: NgxPicaService, private http: HttpClient) { }
 
   ngOnInit(): void {
 
@@ -56,7 +59,7 @@ export class ImagesGroupingComponent implements OnInit {
             i++;
         }, false);
 
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
 
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
@@ -185,6 +188,50 @@ export class ImagesGroupingComponent implements OnInit {
     .replace("Friday","pátek")
     .replace("Saturday","sobota")
     .replace("Sunday","neděle");
+  }
+
+  getUploadToken(): void {
+    const url = 'https://photoslibrary.googleapis.com/v1/uploads';
+    const img = this.files[0];
+    console.log(img.name);
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + token,
+        'Content-type': 'application/octet-stream',
+        'X-Goog-Upload-Content-Type': 'mime-type',
+        'X-Goog-Upload-Protocol': 'raw'
+      })
+    };
+
+    this.http.post(url, img.imageContent, httpOptions).subscribe((res: HttpResponse<any>) => {
+      console.log(res.body);
+    });
+  }
+
+  uploadFile(): void {
+    const url = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
+    const uploadToken = 'CAIS+QIAqD4uLesDxAtNPVZFiYdhLv4xJqdEi9Fiw6bKEGgXs3B/r2RfKSJC0F5TKxNvnQcBTf9DaYFC1V2utrtNxoQjYUVVNR/5JVJvIbXj/PhXnVge+z+IWqYMnuokOiiCmnGXeg3fhKf38B+TAthiz5rsQjoIkovekjwlyYRkMRc/KQ6en/Y4MCIllHs9URP0hT0xpXORFF081a9E0XrTXjUu5S7Hm1KXGyisgQfOEEtLdn6Yh3nwku3crAPcEv+mrvUl7F3yodMkj+qkWtrNOmsOv0W66ewsp8L2cmETHOPj5eweYISo5KUBTc4bTkKZ6q+ufTfo+M7GpCiB8P5Eg/JDrrEi/zNt7Mu/9YVcKlHlqOxOaNTcaqUw28eoLtNUD0nIpsdto+yceAWHUwXz8oeEnc/zeFTqKJUSG/C48Psd8mnCKxo2ectk89b/fJd/9G6VKCWbj4mEQFIZtyOc9gx6sSEaIbKdjbl7CEeU12xHQ2hC0yaDpJ0yvg';
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + token,
+        'Content-type': 'application/json'
+      })
+    };
+    const body = {
+      "newMediaItems": [
+        {
+          "description": "Moje fotka",
+          "simpleMediaItem": {
+            "fileName": "IMG_20200712_180329.jpg",
+            "uploadToken": uploadToken
+          }
+        }
+      ]
+    }
+
+    this.http.post(url, body, httpOptions).subscribe((res) => {
+      console.log(res);
+    });
   }
 
 }
