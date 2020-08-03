@@ -1,8 +1,9 @@
 <h2>Grouping Images</h2>
-<p><a href="https://developers.google.com/oauthplayground">OAuth 2.0 Playground</a></p>
-<p>Authorize APIs: https://www.googleapis.com/auth/photoslibrary.appendonly</p>
+<p>Get access token to Google Photos from: <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a></p>
+<p>Authorize APIs:</p>
+<p>https://www.googleapis.com/auth/photoslibrary.appendonly</p>
 <form [formGroup]="uploadForm">
-  <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label>
+  <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br/>
   <input id="accessToken" type="text" formControlName="accessToken"/>
 </form>
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
@@ -30,5 +31,4 @@
     </div>
   </div>
 </div>
-<!--<button (click)="getUploadToken()">Get upload token</button>-->
 <button (click)="createMedia()">Upload file</button>
