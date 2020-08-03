@@ -3,8 +3,7 @@ import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-
-const token = 'ya29.a0AfH6SMCFfC-sL4MEhJnCyrx2G3-P2iR8RY2HJuI_CvEKh9okArUgb4zWjzv1Jfpwp6OXT7UrdyBqnx4e6-RcBTlNLNcBjwGT_gc32AZNyUMXOe0f30VYlrmBqXeUGm8-ECn6X-sUeghcd4LcxDKo8lSCwuVL8UryJmE';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -18,8 +17,12 @@ export class ImagesGroupingComponent implements OnInit {
   timeDiffDuplicate = 10;
   filesGroups: IFilesGroup[] = [];
   timeDiffGroup = 3600;
+  uploadToken: string;
+  uploadForm = this.fb.group({
+    accessToken: ['']
+  });
 
-  constructor(private ngxPicaService: NgxPicaService, private http: HttpClient) { }
+  constructor(private ngxPicaService: NgxPicaService, private http: HttpClient, private fb: FormBuilder) { }
 
   ngOnInit(): void {
 
@@ -190,13 +193,13 @@ export class ImagesGroupingComponent implements OnInit {
     .replace("Sunday","neděle");
   }
 
-  getUploadToken(): void {
+  createMedia(): void {
     const url = 'https://photoslibrary.googleapis.com/v1/uploads';
     const img = this.files[0];
     console.log(img.name);
     const httpOptions = {
       headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token,
+        'Authorization': 'Bearer ' + this.uploadForm.get(['accessToken']).value,
         'Content-type': 'application/octet-stream',
         'X-Goog-Upload-Content-Type': 'mime-type',
         'X-Goog-Upload-Protocol': 'raw'
@@ -206,16 +209,16 @@ export class ImagesGroupingComponent implements OnInit {
     };
 
     this.http.post(url, img.imageContent, httpOptions).subscribe((res) => {
-      console.log(res);
+      this.uploadToken = res;
+      this.uploadFile();
     });
   }
 
   uploadFile(): void {
     const url = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
-    const uploadToken = 'CAIS+QIAqD4uLesDxAtNPVZFiYdhLv4xJqdEi9Fiw6bKEGgXs3B/r2RfKSJC0F5TKxNvnQcBTf9DaYFC1V2utrtNxoQjYUVVNR/5JVJvIbXj/PhXnVge+z+IWqYMnuokOiiCmnGXeg3fhKf38B+TAthiz5rsQjoIkovekjwlyYRkMRc/KQ6en/Y4MCIllHs9URP0hT0xpXORFF081a9E0XrTXjUu5S7Hm1KXGyisgQfOEEtLdn6Yh3nwku3crAPcEv+mrvUl7F3yodMkj+qkWtrNOmsOv0W66ewsp8L2cmETHOPj5eweYISo5KUBTc4bTkKZ6q+ufTfo+M7GpCiB8P5Eg/JDrrEi/zNt7Mu/9YVcKlHlqOxOaNTcaqUw28eoLtNUD0nIpsdto+yceAWHUwXz8oeEnc/zeFTqKJUSG/C48Psd8mnCKxo2ectk89b/fJd/9G6VKCWbj4mEQFIZtyOc9gx6sSEaIbKdjbl7CEeU12xHQ2hC0yaDpJ0yvg';
     const httpOptions = {
       headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token,
+        'Authorization': 'Bearer ' + this.uploadForm.get(['accessToken']).value,
         'Content-type': 'application/json'
       })
     };
@@ -225,7 +228,7 @@ export class ImagesGroupingComponent implements OnInit {
           "description": "Moje fotka",
           "simpleMediaItem": {
             "fileName": "IMG_20200712_180329.jpg",
-            "uploadToken": uploadToken
+            "uploadToken": this.uploadToken
           }
         }
       ]

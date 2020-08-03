@@ -1,4 +1,10 @@
 <h2>Grouping Images</h2>
+<p><a href="https://developers.google.com/oauthplayground">OAuth 2.0 Playground</a></p>
+<p>Authorize APIs: https://www.googleapis.com/auth/photoslibrary.appendonly</p>
+<form [formGroup]="uploadForm">
+  <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label>
+  <input id="accessToken" type="text" formControlName="accessToken"/>
+</form>
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
 <p *ngIf="files.length > 0">{{files.length}} files in total</p>
 <p *ngIf="getUniqueFilesCount() > 0">{{getUniqueFilesCount()}} files without duplicates in {{filesGroups.length}} groups</p>
@@ -24,5 +30,5 @@
     </div>
   </div>
 </div>
-<button (click)="getUploadToken()">Get upload token</button>
-<button (click)="uploadFile()">Upload file</button>
+<!--<button (click)="getUploadToken()">Get upload token</button>-->
+<button (click)="createMedia()">Upload file</button>
