@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-const token = 'ya29.a0AfH6SMBoH3Cv8xaECEqmn6N1vN3HD1Vhjxml35Bujrr0Hchwvho5z88JK-fklb6FBmP72o1NFXRblSFa0h6aeOgWCTuZ0LnPLYA84HAVMenQOs0YElRCc-kCdZTHxEOpp9X53rMqiv-_Rge4EiMbJ_rKkT9MW7_TzxE9';
+const token = 'ya29.a0AfH6SMCFfC-sL4MEhJnCyrx2G3-P2iR8RY2HJuI_CvEKh9okArUgb4zWjzv1Jfpwp6OXT7UrdyBqnx4e6-RcBTlNLNcBjwGT_gc32AZNyUMXOe0f30VYlrmBqXeUGm8-ECn6X-sUeghcd4LcxDKo8lSCwuVL8UryJmE';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -200,11 +200,13 @@ export class ImagesGroupingComponent implements OnInit {
         'Content-type': 'application/octet-stream',
         'X-Goog-Upload-Content-Type': 'mime-type',
         'X-Goog-Upload-Protocol': 'raw'
-      })
+      }),
+      observe: "body" as const,
+      responseType: "text" as const
     };
 
-    this.http.post(url, img.imageContent, httpOptions).subscribe((res: HttpResponse<any>) => {
-      console.log(res.body);
+    this.http.post(url, img.imageContent, httpOptions).subscribe((res) => {
+      console.log(res);
     });
   }
 
