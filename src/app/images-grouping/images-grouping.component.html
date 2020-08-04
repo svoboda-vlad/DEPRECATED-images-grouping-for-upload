@@ -20,15 +20,15 @@
     <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
   </tr>
 </table>
+<p><button (click)="createMedia()">Upload files</button></p>
 <p></p>
 <div *ngFor="let group of filesGroups">
   <div><b>{{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files (of {{ group.sequence.length }})</b></div>
   <div class="group">
     <div class="file" *ngFor="let seq of group.sequence">
       {{ seq.file.dateTime | date:'HH:mm:ss' }}<br/>
-      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContent"><br/>
+      <img class="img" [ngClass]="{'img-duplicate': seq.isDuplicate === 'Y'}" [src]="seq.file.imageContentUrl"><br/>
       <button (click)="changeIsDuplicate(group, seq)">{{seq.isDuplicate === 'Y' ? 'Add' : 'Remove'}}</button>
     </div>
   </div>
 </div>
-<button (click)="createMedia()">Upload file</button>

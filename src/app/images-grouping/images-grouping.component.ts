@@ -54,15 +54,20 @@ export class ImagesGroupingComponent implements OnInit {
     this.ngxPicaService.resizeImages(filesList, 800, 800, options)
     .subscribe((file) => {
         let reader: FileReader = new FileReader();
+
         reader.addEventListener('load', (event: any) => {
-            this.files.push(new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result));
+          let readerUrl: FileReader = new FileReader();
+
+          readerUrl.addEventListener('load', (event: any) => {
+            this.files.push(new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result, readerUrl.result));
             if((i + 1) === filesList.length) {
               this.filesSequence = this.getFilesSequence(this.files);
-              // this.filesGroups = this.identifyGroups(this.removeDuplicates(this.filesSequence));
               this.filesGroups = this.identifyGroups(this.filesSequence);
             }
             i++;
         }, false);
+        readerUrl.readAsDataURL(file);
+      });
 
         reader.readAsArrayBuffer(file);
 
@@ -206,10 +211,11 @@ export interface IFile {
   name: string;
   dateTime: moment.Moment;
   imageContent: string | ArrayBuffer;
+  imageContentUrl: string | ArrayBuffer;
 }
 
 export class File implements IFile {
-  constructor(public name: string, public dateTime: moment.Moment, public imageContent: string | ArrayBuffer) {}
+  constructor(public name: string, public dateTime: moment.Moment, public imageContent: string | ArrayBuffer, public imageContentUrl: string | ArrayBuffer) {}
 }
 
 export interface IFilesSequence {
