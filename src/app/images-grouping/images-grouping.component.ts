@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
+import { ImageService } from './image.service';
+
+export let accessToken: string = "";
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -22,7 +24,7 @@ export class ImagesGroupingComponent implements OnInit {
     accessToken: ['']
   });
 
-  constructor(private ngxPicaService: NgxPicaService, private http: HttpClient, private fb: FormBuilder) { }
+  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private service: ImageService) { }
 
   ngOnInit(): void {
 
@@ -194,49 +196,8 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createMedia(): void {
-    const url = 'https://photoslibrary.googleapis.com/v1/uploads';
-    const img = this.files[0];
-    console.log(img.name);
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + this.uploadForm.get(['accessToken']).value,
-        'Content-type': 'application/octet-stream',
-        'X-Goog-Upload-Content-Type': 'mime-type',
-        'X-Goog-Upload-Protocol': 'raw'
-      }),
-      observe: "body" as const,
-      responseType: "text" as const
-    };
-
-    this.http.post(url, img.imageContent, httpOptions).subscribe((res) => {
-      this.uploadToken = res;
-      this.uploadFile();
-    });
-  }
-
-  uploadFile(): void {
-    const url = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + this.uploadForm.get(['accessToken']).value,
-        'Content-type': 'application/json'
-      })
-    };
-    const body = {
-      "newMediaItems": [
-        {
-          "description": "Moje fotka",
-          "simpleMediaItem": {
-            "fileName": "IMG_20200712_180329.jpg",
-            "uploadToken": this.uploadToken
-          }
-        }
-      ]
-    }
-
-    this.http.post(url, body, httpOptions).subscribe((res) => {
-      console.log(res);
-    });
+    accessToken = this.uploadForm.get(['accessToken']).value;
+    this.service.createMedia(this.files);
   }
 
 }
