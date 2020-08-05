@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { accessToken, IFile } from './images-grouping.component';
+import { accessToken, IFile, IFilesSequence } from './images-grouping.component';
 
 const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
 const urlMediaItems = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
@@ -12,7 +12,7 @@ export class ImageService {
 
   constructor(private http: HttpClient) { }
 
-  createMedia(files: IFile[]): void {
+  createMedia(filesSequence: IFilesSequence[]): void {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,9 +24,9 @@ export class ImageService {
       responseType: "text" as const
     };
 
-    files.forEach((file) => {
-      this.http.post(urlUploads, file.imageContent, httpOptions).subscribe((uploadToken) => {
-        this.uploadFile(file, uploadToken);
+    filesSequence.forEach((seq) => {
+      this.http.post(urlUploads, seq.file.imageContent, httpOptions).subscribe((uploadToken) => {
+        this.uploadFile(seq.file, uploadToken);
       });
     });
   }

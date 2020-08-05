@@ -202,7 +202,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   createMedia(): void {
     accessToken = this.uploadForm.get(['accessToken']).value;
-    this.service.createMedia(this.files);
+    this.service.createMedia(this.removeDuplicates(this.filesSequence));
   }
 
 }
