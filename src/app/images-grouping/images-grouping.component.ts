@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 import { FormBuilder } from '@angular/forms';
-import { MediaService, IFilesSequence, YesNo, FilesSequence, IFile, File } from './media.service';
+import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 
 export let accessToken: string = "";
 
@@ -14,17 +14,17 @@ export let accessToken: string = "";
 })
 export class ImagesGroupingComponent implements OnInit {
 
-  files: IFile[] = [];
-  filesSequence: IFilesSequence[] = [];
+  mediaItems: IMediaItem[] = [];
+  mediaItemsForGrouping: IMediaItemForGrouping[] = [];
   timeDiffDuplicate = 10;
-  filesGroups: IFilesGroup[] = [];
+  mediaItemsGroups: IMediaItemsGroup[] = [];
   timeDiffGroup = 3600;
   uploadToken: string;
   uploadForm = this.fb.group({
     accessToken: ['']
   });
 
-  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private mediaService: MediaService) { }
+  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private mediaItemService: MediaItemService) { }
 
   ngOnInit(): void {
 
@@ -32,14 +32,14 @@ export class ImagesGroupingComponent implements OnInit {
 
   processFiles(files: FileList): void {
     if(files.length > 0) {
-      this.getFiles(files);
+      this.getMediaItems(files);
     }
   }
 
-  getFiles(filesList) {
-    this.files = [];
-    this.filesSequence = [];
-    this.filesGroups = [];
+  getMediaItems(fileList) {
+    this.mediaItems = [];
+    this.mediaItemsForGrouping = [];
+    this.mediaItemsGroups = [];
 
     const options: NgxPicaResizeOptionsInterface = {
       exifOptions: {
@@ -51,34 +51,34 @@ export class ImagesGroupingComponent implements OnInit {
     };
 
     let i = 0;
-    this.ngxPicaService.resizeImages(filesList, 800, 800, options)
+    this.ngxPicaService.resizeImages(fileList, 800, 800, options)
     .subscribe((file) => {
-        let reader: FileReader = new FileReader();
+        let readerBytes: FileReader = new FileReader();
 
-        reader.addEventListener('load', (event: any) => {
+        readerBytes.addEventListener('load', (event: any) => {
           let readerUrl: FileReader = new FileReader();
 
           readerUrl.addEventListener('load', (event: any) => {
-            this.files.push(new File(file.name, moment(file.name, "YYYYMMDD HHmmss"), reader.result, readerUrl.result));
-            if((i + 1) === filesList.length) {
-              this.filesSequence = this.getFilesSequence(this.files);
-              this.filesGroups = this.identifyGroups(this.filesSequence);
+            this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
+            if((i + 1) === fileList.length) {
+              this.mediaItemsForGrouping = this.getMediaItemsForGrouping(this.mediaItems);
+              this.mediaItemsGroups = this.identifyGroups(this.mediaItemsForGrouping);
             }
             i++;
         }, false);
         readerUrl.readAsDataURL(file);
       });
 
-        reader.readAsArrayBuffer(file);
+        readerBytes.readAsArrayBuffer(file);
 
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
     });
   }
 
-  getFilesSequence(files: IFile[]): IFilesSequence[] {
-    let sequence: IFilesSequence[] = [];
-    files.sort((a, b) => {
+  getMediaItemsForGrouping(items: IMediaItem[]): IMediaItemForGrouping[] {
+    let itemsGrouping: IMediaItemForGrouping[] = [];
+    items.sort((a, b) => {
       let nameA = a.name.toUpperCase(); // ignore upper and lowercase
       let nameB = b.name.toUpperCase(); // ignore upper and lowercase
       if (nameA < nameB) {
@@ -91,77 +91,77 @@ export class ImagesGroupingComponent implements OnInit {
       // names must be equal
       return 0;
     });
-    files.forEach((file, i) => {
-      sequence.push(new FilesSequence(file, i + 1, 0));
+    items.forEach((item, i) => {
+      itemsGrouping.push(new MediaItemForGrouping(item, i + 1, 0));
     });
-    sequence = this.calculateTimeDiff(sequence);
-    sequence = this.identifyDuplicates(sequence);
-    return sequence;
+    itemsGrouping = this.calculateTimeDiff(itemsGrouping);
+    itemsGrouping = this.identifyDuplicates(itemsGrouping);
+    return itemsGrouping;
   }
 
-  calculateTimeDiff(sequence: IFilesSequence[]): IFilesSequence[] {
-    sequence.forEach((seq) => {
-      if(seq.seqNo === 1) {
-        seq.timeDiff = 0;
+  calculateTimeDiff(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
+    itemsGrouping.forEach((item) => {
+      if(item.seqNo === 1) {
+        item.timeDiff = 0;
       } else {
-        const prevSeq = sequence.find((s) => s.seqNo === (seq.seqNo - 1));
-        seq.timeDiff = seq.file.dateTime.diff(prevSeq.file.dateTime, 'second');
+        const prevItem = itemsGrouping.find((s) => s.seqNo === (item.seqNo - 1));
+        item.timeDiff = item.mediaItem.dateTime.diff(prevItem.mediaItem.dateTime, 'second');
       }
     });
-    return sequence;
+    return itemsGrouping;
   }
 
-  identifyDuplicates(sequence: IFilesSequence[]): IFilesSequence[] {
-    sequence.forEach((seq) => {
-      if(seq.seqNo > 1) {
-        if(seq.timeDiff <= this.timeDiffDuplicate) seq.isDuplicate = YesNo.Y;
+  identifyDuplicates(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
+    itemsGrouping.forEach((item) => {
+      if(item.seqNo > 1) {
+        if(item.timeDiff <= this.timeDiffDuplicate) item.isDuplicate = YesNo.Y;
       }
     });
-    return sequence;
+    return itemsGrouping;
   }
 
-  removeDuplicates(sequence: IFilesSequence[]): IFilesSequence[] {
-    return sequence.filter((seq) => seq.isDuplicate === YesNo.N);
+  removeDuplicates(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
+    return itemsGrouping.filter((item) => item.isDuplicate === YesNo.N);
   }
 
-  identifyGroups(sequence: IFilesSequence[]): IFilesGroup[] {
-    const groups: IFilesGroup[] = [];
-    let group: IFilesGroup;
+  identifyGroups(itemsGrouping: IMediaItemForGrouping[]): IMediaItemsGroup[] {
+    const groups: IMediaItemsGroup[] = [];
+    let group: IMediaItemsGroup;
     let id = 1;
-    sequence.forEach((seq, i) => {
-      let groupName: string = seq.file.dateTime.format('YYYY-MM-DD') + " místo (" + seq.file.dateTime.format('dddd H') + 'h)';
+    itemsGrouping.forEach((item, i) => {
+      let groupName: string = item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
       groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
       if (i === 0) {
-        group = new FilesGroup(id, seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+        group = new MediaItemsGroup(id, item.mediaItem.dateTime, item.mediaItem.dateTime, [item], groupName);
         id++;
       // if not the first file
       } else {
         // if a new group is identified, add current group and create a new group
-        if (seq.timeDiff > this.timeDiffGroup) {
+        if (item.timeDiff > this.timeDiffGroup) {
           groups.push(group);
-          group = new FilesGroup(id,seq.file.dateTime, seq.file.dateTime,[seq], groupName);
+          group = new MediaItemsGroup(id,item.mediaItem.dateTime, item.mediaItem.dateTime, [item], groupName);
           id++;
         // if existing group, add the file to the group and update end time
         } else {
-          group.sequence.push(seq);
-          group.endTime = seq.file.dateTime;
+          group.mediaItemsForGrouping.push(item);
+          group.endTime = item.mediaItem.dateTime;
         }
       }
       // if the last file in the sequence, add current group
-      if ((i + 1) === sequence.length) {
+      if ((i + 1) === itemsGrouping.length) {
         groups.push(group);
       }
     });
     return groups;
   }
 
-  getUniqueFilesCount(): number {
-    let uniqueFilesCount = 0;
-    this.filesGroups.forEach((group) => {
-      uniqueFilesCount += group.getCountWithoutDuplicates();
+  getUniqueMediaItemsCount(): number {
+    let uniqueItemsCount = 0;
+    this.mediaItemsGroups.forEach((group) => {
+      uniqueItemsCount += group.getCountWithoutDuplicates();
     })
-    return uniqueFilesCount;
+    return uniqueItemsCount;
   }
 
   getDaysDiffFromToday(groupDate: moment.Moment): number {
@@ -170,20 +170,20 @@ export class ImagesGroupingComponent implements OnInit {
     return groupDateDay.diff(todayDay, 'days');
   }
 
-  updateGroupName(gr: IFilesGroup, newName: string) {
-    this.filesGroups.forEach((group) => {
+  updateGroupName(gr: IMediaItemsGroup, newName: string) {
+    this.mediaItemsGroups.forEach((group) => {
       if(group.id === gr.id) {
         group.name = newName;
       }
     });
   }
 
-  changeIsDuplicate(gr: IFilesGroup, seq: IFilesSequence) {
-    this.filesGroups.forEach((group) => {
+  changeIsDuplicate(gr: IMediaItemsGroup, item: IMediaItemForGrouping) {
+    this.mediaItemsGroups.forEach((group) => {
       if(group.id === gr.id) {
-        group.sequence.forEach((sequence) => {
-          if(sequence.seqNo === seq.seqNo) {
-            seq.isDuplicate = (seq.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
+        group.mediaItemsForGrouping.forEach((mediaItemForGrouping) => {
+          if(mediaItemForGrouping.seqNo === item.seqNo) {
+            item.isDuplicate = (item.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
           }
         });
       }
@@ -202,25 +202,25 @@ export class ImagesGroupingComponent implements OnInit {
 
   createMedia(): void {
     accessToken = this.uploadForm.get(['accessToken']).value;
-    this.mediaService.create(this.removeDuplicates(this.filesSequence));
+    this.mediaItemService.create(this.removeDuplicates(this.mediaItemsForGrouping));
   }
 
 }
 
-export interface IFilesGroup {
+export interface IMediaItemsGroup {
   id: number;
   startTime: moment.Moment;
   endTime: moment.Moment;
-  sequence: IFilesSequence[];
+  mediaItemsForGrouping: IMediaItemForGrouping[];
   name: string;
 
   getCountWithoutDuplicates(): number;
 }
 
-export class FilesGroup implements IFilesGroup {
-  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public sequence: IFilesSequence[], public name: string) {}
+export class MediaItemsGroup implements IMediaItemsGroup {
+  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public mediaItemsForGrouping: IMediaItemForGrouping[], public name: string) {}
 
   getCountWithoutDuplicates(): number {
-    return this.sequence.filter((seq) => seq.isDuplicate === YesNo.N).length;
+    return this.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N).length;
   }
 }
