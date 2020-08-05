@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { accessToken } from './images-grouping.component';
+import { Observable } from 'rxjs';
 
 const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
 const urlMediaItems = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
@@ -8,11 +9,20 @@ const urlMediaItems = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchC
 @Injectable({
   providedIn: 'root'
 })
-export class ImageService {
+export class MediaService {
 
   constructor(private http: HttpClient) { }
 
-  createMedia(filesSequence: IFilesSequence[]): void {
+  create(filesSequence: IFilesSequence[]): void {
+
+    filesSequence.forEach((seq) => {
+      this.uploads(seq.file).subscribe((uploadToken) => {
+        this.batchCreate(seq.file, uploadToken);
+      });
+    });
+  }
+
+  private uploads(file: IFile): Observable<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -23,15 +33,10 @@ export class ImageService {
       observe: "body" as const,
       responseType: "text" as const
     };
-
-    filesSequence.forEach((seq) => {
-      this.http.post(urlUploads, seq.file.imageContent, httpOptions).subscribe((uploadToken) => {
-        this.uploadFile(seq.file, uploadToken);
-      });
-    });
+    return this.http.post(urlUploads, file.imageContent, httpOptions);
   }
 
-  private uploadFile(file: IFile, uploadToken: string): void {
+  private batchCreate(file: IFile, uploadToken: string): void {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,

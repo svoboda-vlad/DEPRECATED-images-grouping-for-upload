@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 import { FormBuilder } from '@angular/forms';
-import { ImageService, IFilesSequence, YesNo, FilesSequence, IFile, File } from './image.service';
+import { MediaService, IFilesSequence, YesNo, FilesSequence, IFile, File } from './media.service';
 
 export let accessToken: string = "";
 
@@ -24,7 +24,7 @@ export class ImagesGroupingComponent implements OnInit {
     accessToken: ['']
   });
 
-  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private service: ImageService) { }
+  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private mediaService: MediaService) { }
 
   ngOnInit(): void {
 
@@ -202,7 +202,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   createMedia(): void {
     accessToken = this.uploadForm.get(['accessToken']).value;
-    this.service.createMedia(this.removeDuplicates(this.filesSequence));
+    this.mediaService.create(this.removeDuplicates(this.filesSequence));
   }
 
 }
