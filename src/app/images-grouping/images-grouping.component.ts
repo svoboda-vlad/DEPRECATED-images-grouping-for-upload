@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 import { FormBuilder } from '@angular/forms';
-import { ImageService } from './image.service';
+import { ImageService, IFilesSequence, YesNo, FilesSequence, IFile, File } from './image.service';
 
 export let accessToken: string = "";
 
@@ -129,7 +129,7 @@ export class ImagesGroupingComponent implements OnInit {
     let group: IFilesGroup;
     let id = 1;
     sequence.forEach((seq, i) => {
-      let groupName: string = seq.file.dateTime.format('YYYY-MM-DD dddd HH').concat('h');
+      let groupName: string = seq.file.dateTime.format('YYYY-MM-DD') + " místo (" + seq.file.dateTime.format('dddd H') + 'h)';
       groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
       if (i === 0) {
@@ -205,33 +205,6 @@ export class ImagesGroupingComponent implements OnInit {
     this.service.createMedia(this.removeDuplicates(this.filesSequence));
   }
 
-}
-
-export interface IFile {
-  name: string;
-  dateTime: moment.Moment;
-  imageContent: string | ArrayBuffer;
-  imageContentUrl: string | ArrayBuffer;
-}
-
-export class File implements IFile {
-  constructor(public name: string, public dateTime: moment.Moment, public imageContent: string | ArrayBuffer, public imageContentUrl: string | ArrayBuffer) {}
-}
-
-export interface IFilesSequence {
-  file: IFile;
-  seqNo: number;
-  timeDiff: number;
-  isDuplicate?: YesNo;
-}
-
-export class FilesSequence implements IFilesSequence {
-  constructor(public file: IFile, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) {}
-}
-
-export const enum YesNo {
-  Y = 'Y',
-  N = 'N'
 }
 
 export interface IFilesGroup {

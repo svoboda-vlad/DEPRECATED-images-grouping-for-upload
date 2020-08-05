@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { accessToken, IFile, IFilesSequence } from './images-grouping.component';
+import { accessToken } from './images-grouping.component';
 
 const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
 const urlMediaItems = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
@@ -55,4 +55,31 @@ export class ImageService {
     });
   }
 
+}
+
+export interface IFile {
+  name: string;
+  dateTime: moment.Moment;
+  imageContent: string | ArrayBuffer;
+  imageContentUrl: string | ArrayBuffer;
+}
+
+export class File implements IFile {
+  constructor(public name: string, public dateTime: moment.Moment, public imageContent: string | ArrayBuffer, public imageContentUrl: string | ArrayBuffer) {}
+}
+
+export interface IFilesSequence {
+  file: IFile;
+  seqNo: number;
+  timeDiff: number;
+  isDuplicate?: YesNo;
+}
+
+export class FilesSequence implements IFilesSequence {
+  constructor(public file: IFile, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) {}
+}
+
+export const enum YesNo {
+  Y = 'Y',
+  N = 'N'
 }
