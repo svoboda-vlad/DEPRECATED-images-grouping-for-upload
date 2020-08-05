@@ -20,6 +20,7 @@
     <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
   </tr>
 </table>
+<p><button (click)="createAlbums()">Create albums</button></p>
 <p><button (click)="createMedia()">Upload files</button></p>
 <p></p>
 <div *ngFor="let group of mediaItemsGroups">

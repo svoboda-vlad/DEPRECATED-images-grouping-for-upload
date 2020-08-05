@@ -4,6 +4,7 @@ import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica'
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
 import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
+import { AlbumService } from './album.service';
 
 export let accessToken: string = "";
 
@@ -24,7 +25,10 @@ export class ImagesGroupingComponent implements OnInit {
     accessToken: ['']
   });
 
-  constructor(private ngxPicaService: NgxPicaService, private fb: FormBuilder, private mediaItemService: MediaItemService) { }
+  constructor(private ngxPicaService: NgxPicaService,
+    private fb: FormBuilder,
+    private mediaItemService: MediaItemService,
+    private albumService: AlbumService) { }
 
   ngOnInit(): void {
 
@@ -201,8 +205,25 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createMedia(): void {
+    this.getAccessToken();
+    this.removeDuplicates(this.mediaItemsForGrouping).forEach((item) => {
+
+      this.mediaItemService.uploads(item.mediaItem).subscribe((uploadToken) => {
+        this.mediaItemService.batchCreate(item.mediaItem, uploadToken);
+      });
+
+    });
+  }
+
+  createAlbums(): void {
+    this.getAccessToken();
+    this.mediaItemsGroups.forEach((group) => {
+      this.albumService.albums(group);
+    });
+  }
+
+  getAccessToken(): void {
     accessToken = this.uploadForm.get(['accessToken']).value;
-    this.mediaItemService.create(this.removeDuplicates(this.mediaItemsForGrouping));
   }
 
 }

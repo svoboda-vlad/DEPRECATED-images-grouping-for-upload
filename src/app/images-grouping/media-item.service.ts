@@ -13,16 +13,7 @@ export class MediaItemService {
 
   constructor(private http: HttpClient) { }
 
-  create(mediaItemsForGrouping: IMediaItemForGrouping[]): void {
-
-    mediaItemsForGrouping.forEach((mediaItemForGrouping) => {
-      this.uploads(mediaItemForGrouping.mediaItem).subscribe((uploadToken) => {
-        this.batchCreate(mediaItemForGrouping.mediaItem, uploadToken);
-      });
-    });
-  }
-
-  private uploads(mediaItem: IMediaItem): Observable<string> {
+  uploads(mediaItem: IMediaItem): Observable<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -36,7 +27,7 @@ export class MediaItemService {
     return this.http.post(urlUploads, mediaItem.contentBytes, httpOptions);
   }
 
-  private batchCreate(mediaItem: IMediaItem, uploadToken: string): void {
+  batchCreate(mediaItem: IMediaItem, uploadToken: string): void {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -55,9 +46,7 @@ export class MediaItemService {
       ]
     }
 
-    this.http.post(urlBatchCreate, body, httpOptions).subscribe((res) => {
-      console.log(res);
-    });
+    this.http.post(urlBatchCreate, body, httpOptions);
   }
 
 }
