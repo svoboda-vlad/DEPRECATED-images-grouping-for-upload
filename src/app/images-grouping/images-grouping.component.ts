@@ -218,7 +218,9 @@ export class ImagesGroupingComponent implements OnInit {
   createAlbums(): void {
     this.getAccessToken();
     this.mediaItemsGroups.forEach((group) => {
-      this.albumService.albums(group);
+      this.albumService.albums(group).subscribe((album) => {
+        group.albumId = album.id;
+      });
     });
   }
 
@@ -234,12 +236,13 @@ export interface IMediaItemsGroup {
   endTime: moment.Moment;
   mediaItemsForGrouping: IMediaItemForGrouping[];
   name: string;
+  albumId?: string;
 
   getCountWithoutDuplicates(): number;
 }
 
 export class MediaItemsGroup implements IMediaItemsGroup {
-  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public mediaItemsForGrouping: IMediaItemForGrouping[], public name: string) {}
+  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public mediaItemsForGrouping: IMediaItemForGrouping[], public name: string, public albumId?: string) {}
 
   getCountWithoutDuplicates(): number {
     return this.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N).length;

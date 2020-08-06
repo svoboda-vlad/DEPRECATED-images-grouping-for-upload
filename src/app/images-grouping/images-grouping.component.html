@@ -14,10 +14,12 @@
   <th>Group</th>
   <th>Files</th>
   <th>Days</th>
+  <th>Album ID</th>
   <tr *ngFor="let group of mediaItemsGroups">
     <td #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</td>
     <td>{{ group.getCountWithoutDuplicates() }}</td>
     <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
+    <td>{{ group.albumId }}</td>
   </tr>
 </table>
 <p><button (click)="createAlbums()">Create albums</button></p>
