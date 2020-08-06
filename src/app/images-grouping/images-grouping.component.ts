@@ -124,8 +124,11 @@ export class ImagesGroupingComponent implements OnInit {
     return itemsGrouping;
   }
 
-  removeDuplicates(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
-    return itemsGrouping.filter((item) => item.isDuplicate === YesNo.N);
+  removeDuplicates(groups: IMediaItemsGroup[]): IMediaItemsGroup[] {
+    groups.forEach((group) => {
+      group.mediaItemsForGrouping = group.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N);
+    })
+    return groups;
   }
 
   identifyGroups(itemsGrouping: IMediaItemForGrouping[]): IMediaItemsGroup[] {
@@ -206,12 +209,13 @@ export class ImagesGroupingComponent implements OnInit {
 
   createMedia(): void {
     this.getAccessToken();
-    this.removeDuplicates(this.mediaItemsForGrouping).forEach((item) => {
-
-      this.mediaItemService.uploads(item.mediaItem).subscribe((uploadToken) => {
-        this.mediaItemService.batchCreate(item.mediaItem, uploadToken);
-      });
-
+    const groupsWithoutDuplicates: IMediaItemsGroup[] = this.mediaItemsGroups;
+    this.removeDuplicates(groupsWithoutDuplicates).forEach((group) => {
+      group.mediaItemsForGrouping.forEach((item) => {
+        this.mediaItemService.uploads(item.mediaItem).subscribe((uploadToken) => {
+          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).subscribe();
+        });
+      })
     });
   }
 

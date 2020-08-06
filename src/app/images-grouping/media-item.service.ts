@@ -27,7 +27,7 @@ export class MediaItemService {
     return this.http.post(urlUploads, mediaItem.contentBytes, httpOptions);
   }
 
-  batchCreate(mediaItem: IMediaItem, uploadToken: string): void {
+  batchCreate(mediaItem: IMediaItem, uploadToken: string, albumId?: string): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -46,7 +46,24 @@ export class MediaItemService {
       ]
     }
 
-    this.http.post(urlBatchCreate, body, httpOptions);
+    const body2 = {
+      "albumId": albumId,
+      "newMediaItems": [
+        {
+          "description": "item-description",
+          "simpleMediaItem": {
+            "fileName": "filename",
+            "uploadToken": "upload-token"
+          }
+        }
+      ],
+      "albumPosition": {
+        "position": "after-media-item",
+        "relativeMediaItemId": "media-item-id"
+      }
+    }
+
+    return this.http.post(urlBatchCreate, body, httpOptions);
   }
 
 }
