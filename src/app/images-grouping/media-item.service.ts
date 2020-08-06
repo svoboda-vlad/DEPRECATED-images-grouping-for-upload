@@ -34,33 +34,18 @@ export class MediaItemService {
         'Content-type': 'application/json'
       })
     };
+
     const body = {
+      "albumId": albumId,
       "newMediaItems": [
         {
-          "description": mediaItem.name,
+          "description": "",
           "simpleMediaItem": {
             "fileName": mediaItem.name,
             "uploadToken": uploadToken
           }
         }
       ]
-    }
-
-    const body2 = {
-      "albumId": albumId,
-      "newMediaItems": [
-        {
-          "description": "item-description",
-          "simpleMediaItem": {
-            "fileName": "filename",
-            "uploadToken": "upload-token"
-          }
-        }
-      ],
-      "albumPosition": {
-        "position": "after-media-item",
-        "relativeMediaItemId": "media-item-id"
-      }
     }
 
     return this.http.post(urlBatchCreate, body, httpOptions);
