@@ -13,7 +13,7 @@ export class MediaItemService {
 
   constructor(private http: HttpClient) { }
 
-  uploads(mediaItem: IMediaItem): Observable<string> {
+  async uploads(mediaItem: IMediaItem): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,10 +24,10 @@ export class MediaItemService {
       observe: "body" as const,
       responseType: "text" as const
     };
-    return this.http.post(urlUploads, mediaItem.contentBytes, httpOptions);
+    return await this.http.post(urlUploads, mediaItem.contentBytes, httpOptions).toPromise();
   }
 
-  batchCreate(mediaItem: IMediaItem, uploadToken: string, albumId?: string): Observable<any> {
+  async batchCreate(mediaItem: IMediaItem, uploadToken: string, albumId?: string): Promise<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -48,7 +48,7 @@ export class MediaItemService {
       ]
     }
 
-    return this.http.post(urlBatchCreate, body, httpOptions);
+    return await this.http.post(urlBatchCreate, body, httpOptions).toPromise();
   }
 
 }

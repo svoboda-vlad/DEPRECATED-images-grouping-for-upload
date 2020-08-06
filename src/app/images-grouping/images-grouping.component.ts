@@ -212,8 +212,8 @@ export class ImagesGroupingComponent implements OnInit {
     const groupsWithoutDuplicates: IMediaItemsGroup[] = this.mediaItemsGroups;
     this.removeDuplicates(groupsWithoutDuplicates).forEach((group) => {
       group.mediaItemsForGrouping.forEach((item) => {
-        this.mediaItemService.uploads(item.mediaItem).subscribe((uploadToken) => {
-          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).subscribe();
+        this.mediaItemService.uploads(item.mediaItem).then((uploadToken) => {
+          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).then();
         });
       })
     });
