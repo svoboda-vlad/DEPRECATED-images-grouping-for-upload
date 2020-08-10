@@ -6,8 +6,6 @@ import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
 
-export let accessToken: string = "";
-
 @Component({
   selector: 'igfu-images-grouping',
   templateUrl: './images-grouping.component.html',
@@ -136,7 +134,7 @@ export class ImagesGroupingComponent implements OnInit {
     let group: IMediaItemsGroup;
     let id = 1;
     itemsGrouping.forEach((item, i) => {
-      let groupName: string = item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
+      let groupName: string = "(nenasdíleno) " + item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
       groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
       if (i === 0) {
@@ -208,28 +206,27 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createMedia(): void {
-    this.getAccessToken();
     const groupsWithoutDuplicates: IMediaItemsGroup[] = this.mediaItemsGroups;
+    // converted to async/await promises to ensure sequential upload
     this.removeDuplicates(groupsWithoutDuplicates).forEach((group) => {
       group.mediaItemsForGrouping.forEach((item) => {
-        this.mediaItemService.uploads(item.mediaItem).then((uploadToken) => {
-          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).then();
+        this.mediaItemService.uploads(item.mediaItem, this.getAccessToken()).then((uploadToken) => {
+          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then();
         });
       })
     });
   }
 
   createAlbums(): void {
-    this.getAccessToken();
     this.mediaItemsGroups.forEach((group) => {
-      this.albumService.albums(group).subscribe((album) => {
+      this.albumService.albums(group, this.getAccessToken()).subscribe((album) => {
         group.albumId = album.id;
       });
     });
   }
 
-  getAccessToken(): void {
-    accessToken = this.uploadForm.get(['accessToken']).value;
+  getAccessToken(): any {
+    return this.uploadForm.get(['accessToken']).value;
   }
 
 }

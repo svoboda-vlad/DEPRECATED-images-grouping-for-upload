@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { accessToken } from './images-grouping.component';
-import { Observable } from 'rxjs';
 
 const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
 const urlBatchCreate = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
@@ -13,7 +11,7 @@ export class MediaItemService {
 
   constructor(private http: HttpClient) { }
 
-  async uploads(mediaItem: IMediaItem): Promise<string> {
+  async uploads(mediaItem: IMediaItem, accessToken: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -27,7 +25,7 @@ export class MediaItemService {
     return await this.http.post(urlUploads, mediaItem.contentBytes, httpOptions).toPromise();
   }
 
-  async batchCreate(mediaItem: IMediaItem, uploadToken: string, albumId?: string): Promise<any> {
+  async batchCreate(mediaItem: IMediaItem, uploadToken: string, accessToken: string, albumId?: string): Promise<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,

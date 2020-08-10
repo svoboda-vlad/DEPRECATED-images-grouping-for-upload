@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { accessToken, IMediaItemsGroup } from './images-grouping.component';
+import { IMediaItemsGroup } from './images-grouping.component';
 import { Observable } from 'rxjs';
 
 const urlAlbums = 'https://photoslibrary.googleapis.com/v1/albums';
@@ -12,7 +12,7 @@ export class AlbumService {
 
   constructor(private http: HttpClient) { }
 
-  albums(group: IMediaItemsGroup): Observable<IAlbum> {
+  albums(group: IMediaItemsGroup, accessToken: string): Observable<IAlbum> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
