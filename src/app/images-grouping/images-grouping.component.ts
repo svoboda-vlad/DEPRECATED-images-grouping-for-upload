@@ -211,7 +211,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.removeDuplicates(groupsWithoutDuplicates).forEach((group) => {
       group.mediaItemsForGrouping.forEach((item) => {
         this.mediaItemService.uploads(item.mediaItem, this.getAccessToken()).then((uploadToken) => {
-          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then();
+          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then(() => item.mediaItem.uploadSuccess = true);
         });
       })
     });
@@ -240,6 +240,7 @@ export interface IMediaItemsGroup {
   albumId?: string;
 
   getCountWithoutDuplicates(): number;
+  getUploadedCount() : number;
 }
 
 export class MediaItemsGroup implements IMediaItemsGroup {
@@ -247,5 +248,9 @@ export class MediaItemsGroup implements IMediaItemsGroup {
 
   getCountWithoutDuplicates(): number {
     return this.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N).length;
+  }
+
+  getUploadedCount() : number {
+    return this.mediaItemsForGrouping.filter((item) => item.mediaItem.uploadSuccess).length;
   }
 }

@@ -13,11 +13,13 @@
 <table *ngIf="mediaItemsGroups.length > 0">
   <th>Group</th>
   <th>Files</th>
+  <th>Uploaded</th>
   <th>Days</th>
   <th>Album ID</th>
   <tr *ngFor="let group of mediaItemsGroups">
     <td #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</td>
     <td>{{ group.getCountWithoutDuplicates() }}</td>
+    <td>{{ group.getUploadedCount() }}</td>
     <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
     <td>{{ group.albumId }}</td>
   </tr>
@@ -31,7 +33,8 @@
     <div class="file" *ngFor="let item of group.mediaItemsForGrouping">
       {{ item.mediaItem.dateTime | date:'HH:mm:ss' }}<br/>
       <img class="img" [ngClass]="{'img-duplicate': item.isDuplicate === 'Y'}" [src]="item.mediaItem.contentUrl"><br/>
-      <button (click)="changeIsDuplicate(group, item)">{{item.isDuplicate === 'Y' ? 'Add' : 'Remove'}}</button>
+      <button (click)="changeIsDuplicate(group, item)">{{item.isDuplicate === 'Y' ? 'Add' : 'Remove'}}</button><br/>
+      <div>{{item.mediaItem.uploadSuccess ? 'Uploaded' : 'Not uploaded'}}</div>
     </div>
   </div>
 </div>

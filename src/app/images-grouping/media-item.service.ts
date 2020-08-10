@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { throwError as observableThrowError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
 const urlBatchCreate = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
@@ -46,7 +48,12 @@ export class MediaItemService {
       ]
     }
 
-    return await this.http.post(urlBatchCreate, body, httpOptions).toPromise();
+    return await this.http.post(urlBatchCreate, body, httpOptions).pipe(catchError(this.handleError)).toPromise();
+  }
+
+  private handleError(res: HttpErrorResponse | any) {
+    console.error(res.error || res.body.error);
+    return observableThrowError(res.error || 'Server error');
   }
 
 }
@@ -56,9 +63,11 @@ export interface IMediaItem {
   dateTime: moment.Moment;
   contentBytes: string | ArrayBuffer;
   contentUrl: string | ArrayBuffer;
+  uploadSuccess?: boolean;
 }
 
 export class MediaItem implements IMediaItem {
+  uploadSuccess: boolean = false;
   constructor(public name: string, public dateTime: moment.Moment, public contentBytes: string | ArrayBuffer, public contentUrl: string | ArrayBuffer) {}
 }
 
