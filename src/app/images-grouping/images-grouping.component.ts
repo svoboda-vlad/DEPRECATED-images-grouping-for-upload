@@ -206,13 +206,14 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createMedia(): void {
-    const groupsWithoutDuplicates: IMediaItemsGroup[] = this.mediaItemsGroups;
     // converted to async/await promises to ensure sequential upload
-    this.removeDuplicates(groupsWithoutDuplicates).forEach((group) => {
+    this.mediaItemsGroups.forEach((group) => {
       group.mediaItemsForGrouping.forEach((item) => {
-        this.mediaItemService.uploads(item.mediaItem, this.getAccessToken()).then((uploadToken) => {
-          this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then(() => item.mediaItem.uploadSuccess = true);
-        });
+        if (item.isDuplicate === YesNo.N) {
+          this.mediaItemService.uploads(item.mediaItem, this.getAccessToken()).then((uploadToken) => {
+            this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then(() => item.mediaItem.uploadSuccess = true);
+          });
+        }
       })
     });
   }
