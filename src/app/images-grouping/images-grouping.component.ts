@@ -122,13 +122,6 @@ export class ImagesGroupingComponent implements OnInit {
     return itemsGrouping;
   }
 
-  removeDuplicates(groups: IMediaItemsGroup[]): IMediaItemsGroup[] {
-    groups.forEach((group) => {
-      group.mediaItemsForGrouping = group.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N);
-    })
-    return groups;
-  }
-
   identifyGroups(itemsGrouping: IMediaItemForGrouping[]): IMediaItemsGroup[] {
     const groups: IMediaItemsGroup[] = [];
     let group: IMediaItemsGroup;
