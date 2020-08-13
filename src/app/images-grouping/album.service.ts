@@ -3,12 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
 import { Observable } from 'rxjs';
 
-const urlAlbums = 'https://photoslibrary.googleapis.com/v1/albums';
-
 @Injectable({
   providedIn: 'root'
 })
 export class AlbumService {
+  public albumsUrl = 'https://photoslibrary.googleapis.com/v1/albums';
 
   constructor(private http: HttpClient) { }
 
@@ -24,7 +23,7 @@ export class AlbumService {
       "album": album
     }
 
-    return this.http.post<IAlbum>(urlAlbums, body, httpOptions);
+    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions);
   }
 
 }
