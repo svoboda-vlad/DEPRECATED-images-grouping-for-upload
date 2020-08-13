@@ -9,6 +9,10 @@ import { MediaItemForGrouping, MediaItem, IMediaItem, IMediaItemForGrouping, Yes
 describe('AlbumService', () => {
   let service: AlbumService;
   let httpMock: HttpTestingController;
+  let accessToken: string;
+  let item: IMediaItem;
+  let itemGrouping: IMediaItemForGrouping;
+  let group: IMediaItemsGroup;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,6 +20,11 @@ describe('AlbumService', () => {
     });
     service = TestBed.inject(AlbumService);
     httpMock = TestBed.get(HttpTestingController);
+
+    accessToken = '12345';
+    item = new MediaItem('item', moment(), '', '');
+    itemGrouping = new MediaItemForGrouping(item, 1, 1, YesNo.N);
+    group = new MediaItemsGroup(1, moment(), moment(), [ itemGrouping ], 'group');
   });
 
   it('should be created', () => {
@@ -23,10 +32,6 @@ describe('AlbumService', () => {
   });
 
   it('should create an album', () => {
-    const accessToken = '12345';
-    const item: IMediaItem = new MediaItem('item', moment(), '', '');
-    const itemGrouping: IMediaItemForGrouping = new MediaItemForGrouping(item, 1, 1, YesNo.N);
-    const group: IMediaItemsGroup = new MediaItemsGroup(1, moment(), moment(), [ itemGrouping ], 'group');
     const album: IAlbum = new Album('group');
 
     // 1) should return album
@@ -48,4 +53,19 @@ describe('AlbumService', () => {
     // should not be any outstanding requests
     httpMock.verify();
   });
+
+  it('should return null when HTTP request fails', () => {
+    // 1) should return null (not an error)
+    service.albums(group, accessToken).subscribe(
+      data => expect(data).toEqual(null),
+      fail
+    );
+    // 2) should call api once
+    const req = httpMock.expectOne(service.albumsUrl);
+    // mocked HTTP response
+    req.flush('deliberate 404 error', { status: 404, statusText: 'Not Found' });
+    // should not be any outstanding requests
+    httpMock.verify();
+  });
+
 });

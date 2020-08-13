@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { throwError } from 'rxjs';
+import { throwError, of, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -48,12 +48,14 @@ export class MediaItemService {
       ]
     }
 
-    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(this.handleError)).toPromise();
+    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(this.handleError<any>('batchCreate', null))).toPromise();
   }
 
-  private handleError(res: HttpErrorResponse | any) {
-    console.error(res.error || res.body.error);
-    return throwError(res || 'Server error');
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      return of(result as T);
+    };
   }
 
 }

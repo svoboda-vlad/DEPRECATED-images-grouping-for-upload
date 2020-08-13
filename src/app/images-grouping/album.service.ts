@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,17 @@ export class AlbumService {
       "album": album
     }
 
-    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions);
+    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
+    .pipe(
+      catchError(this.handleError<IAlbum>('albums', null))
+      );
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      return of(result as T);
+    };
   }
 
 }

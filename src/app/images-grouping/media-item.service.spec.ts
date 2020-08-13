@@ -9,6 +9,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 describe('MediaService', () => {
   let service: MediaItemService;
   let httpMock: HttpTestingController;
+  let accessToken: string;
+  let item: IMediaItem;
+  let uploadToken: string;
+  let albumId: string;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,6 +20,11 @@ describe('MediaService', () => {
     });
     service = TestBed.inject(MediaItemService);
     httpMock = TestBed.get(HttpTestingController);
+
+    accessToken = '12345';
+    item = new MediaItem('item', moment(), 'abc', 'cde');
+    uploadToken = 'ut1';
+    albumId = 'a1';
   });
 
   it('should be created', () => {
@@ -23,10 +32,6 @@ describe('MediaService', () => {
   });
 
   it('should return an upload token', () => {
-    const accessToken = '12345';
-    const item: IMediaItem = new MediaItem('item', moment(), 'abc', 'cde');
-    const uploadToken = 'ut1';
-
     // 1) should return an upload token
     service.uploads(item, accessToken).then(
       data => expect(data).toEqual(uploadToken),
@@ -48,10 +53,6 @@ describe('MediaService', () => {
 
 
   it('should create media items', () => {
-    const accessToken = '12345';
-    const item: IMediaItem = new MediaItem('item', moment(), 'abc', 'cde');
-    const uploadToken = 'ut1';
-    const albumId = 'a1';
     const requestBody = {
       "albumId": albumId,
       "newMediaItems": [
@@ -85,27 +86,16 @@ describe('MediaService', () => {
     httpMock.verify();
   });
 
-  it('should return an error when HTTP request fails', () => {
-    const emsg = 'deliberate 404 error';
-    const errorStatus = 404;
-
-    const accessToken = '12345';
-    const item: IMediaItem = new MediaItem('item', moment(), 'abc', 'cde');
-    const uploadToken = 'ut1';
-    const albumId = 'a1';
-
-    // 1) should return an error
+  it('should return null when HTTP request fails', () => {
+    // 1) should return null (not an error)
     service.batchCreate(item, uploadToken, accessToken, albumId).then(
-      data => fail('should have failed with the 404 error'),
-      (error: HttpErrorResponse) => {
-        expect(error.status).toEqual(errorStatus, 'status');
-        expect(error.error).toEqual(emsg, 'message');
-      }
+      data => expect(data).toEqual(null),
+      fail
     );
     // 2) should call api once
     const req = httpMock.expectOne(service.batchCreateUrl);
     // mocked HTTP response
-    req.flush(emsg, { status: errorStatus, statusText: 'Not Found' });
+    req.flush('deliberate 404 error', { status: 404, statusText: 'Not Found' });
     // should not be any outstanding requests
     httpMock.verify();
   });
