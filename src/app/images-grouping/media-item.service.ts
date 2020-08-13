@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { throwError as observableThrowError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-
-const urlUploads = 'https://photoslibrary.googleapis.com/v1/uploads';
-const urlBatchCreate = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MediaItemService {
+
+  public uploadsUrl = 'https://photoslibrary.googleapis.com/v1/uploads';
+  public batchCreateUrl = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
 
   constructor(private http: HttpClient) { }
 
@@ -24,7 +24,7 @@ export class MediaItemService {
       observe: "body" as const,
       responseType: "text" as const
     };
-    return await this.http.post(urlUploads, mediaItem.contentBytes, httpOptions).toPromise();
+    return await this.http.post(this.uploadsUrl, mediaItem.contentBytes, httpOptions).toPromise();
   }
 
   async batchCreate(mediaItem: IMediaItem, uploadToken: string, accessToken: string, albumId?: string): Promise<any> {
@@ -48,12 +48,12 @@ export class MediaItemService {
       ]
     }
 
-    return await this.http.post(urlBatchCreate, body, httpOptions).pipe(catchError(this.handleError)).toPromise();
+    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(this.handleError)).toPromise();
   }
 
   private handleError(res: HttpErrorResponse | any) {
     console.error(res.error || res.body.error);
-    return observableThrowError(res.error || 'Server error');
+    return throwError(res || 'Server error');
   }
 
 }

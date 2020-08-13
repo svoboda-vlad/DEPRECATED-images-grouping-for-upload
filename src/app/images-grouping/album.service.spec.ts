@@ -34,17 +34,18 @@ describe('AlbumService', () => {
       data => expect(data).toEqual(album),
       fail
     );
-    // 2) should call albums api once
+    // 2) should call api once
     const req = httpMock.expectOne(service.albumsUrl);
     // 3) should use POST method
     expect(req.request.method).toEqual('POST');
-    // 4) should send authorization header with access token
+    // 4) should send required headers
     expect(req.request.headers.get('Authorization')).toEqual('Bearer ' + accessToken);
+    expect(req.request.headers.get('Content-type')).toEqual('application/json');
     // 5) should send data in the body of the request
     expect(req.request.body).toEqual({"album": album});
     // mocked HTTP response
     req.flush(album);
-    // 6) should not be any outstanding requests
+    // should not be any outstanding requests
     httpMock.verify();
   });
 });
