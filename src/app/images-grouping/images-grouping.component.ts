@@ -22,6 +22,9 @@ export class ImagesGroupingComponent implements OnInit {
   uploadForm = this.fb.group({
     accessToken: ['']
   });
+  filesLoaded: boolean = false;
+  filesCount: number;
+  groupsCreated: boolean = false;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -34,15 +37,21 @@ export class ImagesGroupingComponent implements OnInit {
 
   processFiles(files: FileList): void {
     if(files.length > 0) {
+      this.filesCount = files.length;
+      this.emptyArrays();
       this.getMediaItems(files);
     }
   }
 
-  getMediaItems(fileList) {
+  private emptyArrays() : void {
     this.mediaItems = [];
     this.mediaItemsForGrouping = [];
     this.mediaItemsGroups = [];
+    this.filesLoaded = false;
+    this.groupsCreated = false;
+  }
 
+  private getMediaItems(fileList): void {
     const options: NgxPicaResizeOptionsInterface = {
       exifOptions: {
         forceExifOrientation: true
@@ -51,36 +60,33 @@ export class ImagesGroupingComponent implements OnInit {
         keepAspectRatio: true
       }
     };
-
-    let i = 0;
-    this.ngxPicaService.resizeImages(fileList, 800, 800, options)
-    .subscribe((file) => {
-        let readerBytes: FileReader = new FileReader();
-
-        readerBytes.addEventListener('load', (event: any) => {
-          let readerUrl: FileReader = new FileReader();
-
-          readerUrl.addEventListener('load', (event: any) => {
-            this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
-            if((i + 1) === fileList.length) {
-              this.mediaItemsForGrouping = this.getMediaItemsForGrouping(this.mediaItems);
-              this.mediaItemsGroups = this.identifyGroups(this.mediaItemsForGrouping);
-            }
-            i++;
+    this.ngxPicaService.resizeImages(fileList, 800, 800, options).subscribe((file) => {
+      let readerBytes: FileReader = new FileReader();
+      readerBytes.addEventListener('load', (event: any) => {
+        let readerUrl: FileReader = new FileReader();
+        readerUrl.addEventListener('load', (event: any) => {
+          this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
         }, false);
         readerUrl.readAsDataURL(file);
-      });
-
-        readerBytes.readAsArrayBuffer(file);
-
+      }, false);
+      readerBytes.readAsArrayBuffer(file);
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
+    }, () => {
+      this.filesLoaded = true;
     });
   }
 
-  getMediaItemsForGrouping(items: IMediaItem[]): IMediaItemForGrouping[] {
-    let itemsGrouping: IMediaItemForGrouping[] = [];
-    items.sort((a, b) => {
+  createGroups() : void {
+    this.getMediaItemsForGrouping();
+    this.calculateTimeDiff();
+    this.identifyDuplicates();
+    this.identifyGroups();
+    this.groupsCreated = true;
+  }
+
+  private getMediaItemsForGrouping(): void {
+    this.mediaItems.sort((a, b) => {
       let nameA = a.name.toUpperCase(); // ignore upper and lowercase
       let nameB = b.name.toUpperCase(); // ignore upper and lowercase
       if (nameA < nameB) {
@@ -93,40 +99,34 @@ export class ImagesGroupingComponent implements OnInit {
       // names must be equal
       return 0;
     });
-    items.forEach((item, i) => {
-      itemsGrouping.push(new MediaItemForGrouping(item, i + 1, 0));
+    this.mediaItems.forEach((item, i) => {
+      this.mediaItemsForGrouping.push(new MediaItemForGrouping(item, i + 1, 0));
     });
-    itemsGrouping = this.calculateTimeDiff(itemsGrouping);
-    itemsGrouping = this.identifyDuplicates(itemsGrouping);
-    return itemsGrouping;
   }
 
-  calculateTimeDiff(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
-    itemsGrouping.forEach((item) => {
+  private calculateTimeDiff(): void {
+    this.mediaItemsForGrouping.forEach((item) => {
       if(item.seqNo === 1) {
         item.timeDiff = 0;
       } else {
-        const prevItem = itemsGrouping.find((s) => s.seqNo === (item.seqNo - 1));
+        const prevItem = this.mediaItemsForGrouping.find((s) => s.seqNo === (item.seqNo - 1));
         item.timeDiff = item.mediaItem.dateTime.diff(prevItem.mediaItem.dateTime, 'second');
       }
     });
-    return itemsGrouping;
   }
 
-  identifyDuplicates(itemsGrouping: IMediaItemForGrouping[]): IMediaItemForGrouping[] {
-    itemsGrouping.forEach((item) => {
+  private identifyDuplicates(): void {
+    this.mediaItemsForGrouping.forEach((item) => {
       if(item.seqNo > 1) {
         if(item.timeDiff <= this.timeDiffDuplicate) item.isDuplicate = YesNo.Y;
       }
     });
-    return itemsGrouping;
   }
 
-  identifyGroups(itemsGrouping: IMediaItemForGrouping[]): IMediaItemsGroup[] {
-    const groups: IMediaItemsGroup[] = [];
+  private identifyGroups(): void {
     let group: IMediaItemsGroup;
     let id = 1;
-    itemsGrouping.forEach((item, i) => {
+    this.mediaItemsForGrouping.forEach((item, i) => {
       let groupName: string = "(nenasdíleno) " + item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
       groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
@@ -137,7 +137,7 @@ export class ImagesGroupingComponent implements OnInit {
       } else {
         // if a new group is identified, add current group and create a new group
         if (item.timeDiff > this.timeDiffGroup) {
-          groups.push(group);
+          this.mediaItemsGroups.push(group);
           group = new MediaItemsGroup(id,item.mediaItem.dateTime, item.mediaItem.dateTime, [item], groupName);
           id++;
         // if existing group, add the file to the group and update end time
@@ -147,11 +147,10 @@ export class ImagesGroupingComponent implements OnInit {
         }
       }
       // if the last file in the sequence, add current group
-      if ((i + 1) === itemsGrouping.length) {
-        groups.push(group);
+      if ((i + 1) === this.mediaItemsForGrouping.length) {
+        this.mediaItemsGroups.push(group);
       }
     });
-    return groups;
   }
 
   getUniqueMediaItemsCount(): number {
@@ -188,7 +187,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  translateWeekdayNamesToCzech(name: string) : string {
+  private translateWeekdayNamesToCzech(name: string) : string {
     return name.replace("Monday","pondělí")
     .replace("Tuesday","úterý")
     .replace("Wednesday","středa")
@@ -219,7 +218,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  getAccessToken(): any {
+  private getAccessToken(): any {
     return this.uploadForm.get(['accessToken']).value;
   }
 
