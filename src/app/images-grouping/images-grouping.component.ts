@@ -26,6 +26,17 @@ export class ImagesGroupingComponent implements OnInit {
   filesCount: number;
   groupsCreated: boolean = false;
 
+  picaOptions: NgxPicaResizeOptionsInterface = {
+    exifOptions: {
+      forceExifOrientation: true
+    },
+    aspectRatio: {
+      keepAspectRatio: true
+    }
+  };
+  resizeWidth = 800;
+  resizeHeight = 800;
+
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
     private mediaItemService: MediaItemService,
@@ -52,29 +63,29 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   private getMediaItems(fileList): void {
-    const options: NgxPicaResizeOptionsInterface = {
-      exifOptions: {
-        forceExifOrientation: true
-      },
-      aspectRatio: {
-        keepAspectRatio: true
-      }
-    };
-    this.ngxPicaService.resizeImages(fileList, 800, 800, options).subscribe((file) => {
-      let readerBytes: FileReader = new FileReader();
-      readerBytes.addEventListener('load', (event: any) => {
-        let readerUrl: FileReader = new FileReader();
-        readerUrl.addEventListener('load', (event: any) => {
-          this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
-        }, false);
-        readerUrl.readAsDataURL(file);
-      }, false);
-      readerBytes.readAsArrayBuffer(file);
+    this.ngxPicaService.resizeImages(fileList, this.resizeWidth, this.resizeHeight, this.picaOptions).subscribe((file) => {
+      this.readFileBytes(file);
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
     }, () => {
       this.filesLoaded = true;
     });
+  }
+
+  readFileBytes(file: File): void {
+    let readerBytes: FileReader = new FileReader();
+    readerBytes.addEventListener('load', (event: any) => {
+      this.readFileUrl(readerBytes, file);
+    }, false);
+    readerBytes.readAsArrayBuffer(file);
+  }
+
+  readFileUrl(readerBytes: FileReader, file: File): void {
+    let readerUrl: FileReader = new FileReader();
+    readerUrl.addEventListener('load', (event: any) => {
+      this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
+    }, false);
+    readerUrl.readAsDataURL(file);
   }
 
   createGroups() : void {
