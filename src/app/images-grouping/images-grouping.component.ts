@@ -54,7 +54,7 @@ export class ImagesGroupingComponent implements OnInit {
     }
   }
 
-  private emptyArrays() : void {
+  emptyArrays() : void {
     this.mediaItems = [];
     this.mediaItemsForGrouping = [];
     this.mediaItemsGroups = [];
@@ -62,7 +62,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.groupsCreated = false;
   }
 
-  private getMediaItems(fileList): void {
+  getMediaItems(fileList): void {
     this.ngxPicaService.resizeImages(fileList, this.resizeWidth, this.resizeHeight, this.picaOptions).subscribe((file) => {
       this.readFileBytes(file);
     }, (err: NgxPicaErrorInterface) => {
@@ -93,14 +93,14 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createGroups(): void {
-    this.getMediaItemsForGrouping();
+    this.createMediaItemsForGrouping();
     this.calculateTimeDiff();
     this.identifyDuplicates();
     this.identifyGroups();
     this.groupsCreated = true;
   }
 
-  private getMediaItemsForGrouping(): void {
+  createMediaItemsForGrouping(): void {
     this.mediaItems.sort((a, b) => {
       let nameA = a.name.toUpperCase(); // ignore upper and lowercase
       let nameB = b.name.toUpperCase(); // ignore upper and lowercase
@@ -119,7 +119,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private calculateTimeDiff(): void {
+  calculateTimeDiff(): void {
     this.mediaItemsForGrouping.forEach((item) => {
       if(item.seqNo === 1) {
         item.timeDiff = 0;
@@ -130,7 +130,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private identifyDuplicates(): void {
+  identifyDuplicates(): void {
     this.mediaItemsForGrouping.forEach((item) => {
       if(item.seqNo > 1) {
         if(item.timeDiff <= this.timeDiffDuplicate) item.isDuplicate = YesNo.Y;
@@ -138,7 +138,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private identifyGroups(): void {
+  identifyGroups(): void {
     let group: IMediaItemsGroup;
     let id = 1;
     this.mediaItemsForGrouping.forEach((item, i) => {
@@ -202,7 +202,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private translateWeekdayNamesToCzech(name: string) : string {
+  translateWeekdayNamesToCzech(name: string) : string {
     return name.replace("Monday","pondělí")
     .replace("Tuesday","úterý")
     .replace("Wednesday","středa")
@@ -233,7 +233,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private getAccessToken(): any {
+  getAccessToken(): any {
     return this.uploadForm.get(['accessToken']).value;
   }
 

@@ -1,16 +1,17 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import * as moment from 'moment';
 
 import { ImagesGroupingComponent } from './images-grouping.component';
 import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MediaItem, MediaItemForGrouping } from './media-item.service';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
   let fixture: ComponentFixture<ImagesGroupingComponent>;
   let resizeImagesSpy: jasmine.Spy;
-  let readAsArrayBufferSpy: jasmine.Spy;
   let file: File;
 
   beforeEach(async(() => {
@@ -47,7 +48,7 @@ describe('ImagesGroupingComponent', () => {
       item: (index: number) => file
     };
 
-    component.processFiles(fileList);
+    component.getMediaItems(fileList);
     expect(resizeImagesSpy.calls.count()).toEqual(1);
     expect(resizeImagesSpy.calls.argsFor(0)).toEqual([fileList, component.resizeWidth, component.resizeHeight, component.picaOptions]);
 
@@ -69,5 +70,48 @@ describe('ImagesGroupingComponent', () => {
     component.createMediaItem(file, new FileReader(), new FileReader());
     expect(component.mediaItems[0].name).toEqual(file.name);
   });
+
+  it('should create media items for grouping with sequence numbers',() => {
+    component.mediaItems = [];
+    component.mediaItemsForGrouping = [];
+    const mediaItem1 = new MediaItem('name B',moment(),'123','321');
+    const mediaItem2 = new MediaItem('name A',moment(),'456','654');
+    component.mediaItems.push(mediaItem1);
+    component.mediaItems.push(mediaItem2);
+    component.createMediaItemsForGrouping();
+    expect(component.mediaItemsForGrouping.length).toEqual(2);
+    expect(component.mediaItemsForGrouping[0].mediaItem).toEqual(mediaItem2);
+    expect(component.mediaItemsForGrouping[1].mediaItem).toEqual(mediaItem1);
+  });
+
+  it('should calculate correct time differences between files', () => {
+    component.mediaItemsForGrouping = [];
+    const dateString = '2020-08-19';
+    const timeDiffSec = 5;
+    const dateTime1 = moment(dateString);
+    const dateTime2 = moment(dateString).add(timeDiffSec,'seconds');
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A',dateTime1,'123','321'),1,0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',dateTime2,'456','654'),2,0);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping1);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping2);
+    component.calculateTimeDiff();
+    expect(component.mediaItemsForGrouping[0].timeDiff).toEqual(0);
+    expect(component.mediaItemsForGrouping[1].timeDiff).toEqual(timeDiffSec);
+  });
+
+  /*it('',() => {
+    component.mediaItems = [];
+    const firstDateTime = moment();
+    const mediaItem1 = new MediaItem('name 1',firstDateTime,'123','321')
+    const mediaItem2 = new MediaItem('name 2',firstDateTime.add(component.timeDiffGroup,'second'),'456','654')
+    component.mediaItems.push(mediaItem2);
+    component.mediaItems.push(mediaItem1);
+    component.createGroups();
+    expect(component.mediaItemsGroups.length).toEqual(2);
+    expect(component.mediaItemsGroups[0].mediaItemsForGrouping.length).toEqual(1);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping.length).toEqual(1);
+    expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0]).toEqual(mediaItem1);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping[1]).toEqual(mediaItem2);
+  });*/
 
 });
