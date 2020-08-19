@@ -176,8 +176,7 @@ export class ImagesGroupingComponent implements OnInit {
     return uniqueItemsCount;
   }
 
-  getDaysDiffFromToday(groupDate: moment.Moment): number {
-    const todayDay = moment(moment().format('YYYY-MM-DD'));
+  getDaysDiffFromToday(groupDate: moment.Moment, todayDay = moment(moment().format('YYYY-MM-DD'))): number {
     const groupDateDay = moment(groupDate.format('YYYY-MM-DD'));
     return groupDateDay.diff(todayDay, 'days');
   }
@@ -202,7 +201,7 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  translateWeekdayNamesToCzech(name: string) : string {
+  private translateWeekdayNamesToCzech(name: string) : string {
     return name.replace("Monday","pondělí")
     .replace("Tuesday","úterý")
     .replace("Wednesday","středa")
