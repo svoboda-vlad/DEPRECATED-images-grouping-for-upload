@@ -6,7 +6,7 @@ import { ImagesGroupingComponent } from './images-grouping.component';
 import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MediaItem, MediaItemForGrouping } from './media-item.service';
+import { MediaItem, MediaItemForGrouping, YesNo } from './media-item.service';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
@@ -99,19 +99,32 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsForGrouping[1].timeDiff).toEqual(timeDiffSec);
   });
 
-  /*it('',() => {
-    component.mediaItems = [];
-    const firstDateTime = moment();
-    const mediaItem1 = new MediaItem('name 1',firstDateTime,'123','321')
-    const mediaItem2 = new MediaItem('name 2',firstDateTime.add(component.timeDiffGroup,'second'),'456','654')
-    component.mediaItems.push(mediaItem2);
-    component.mediaItems.push(mediaItem1);
-    component.createGroups();
+  it('should correctly identify duplicate', () => {
+    component.mediaItemsForGrouping = [];
+    const dateString = '2020-08-19';
+    const dateTime1 = moment(dateString);
+    const dateTime2 = moment(dateString).add(component.timeDiffDuplicate,'seconds');
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A',dateTime1,'123','321'),1,0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',dateTime2,'456','654'),2,0);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping1);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping2);
+    component.identifyDuplicates();
+    expect(component.mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.N);
+    expect(component.mediaItemsForGrouping[1].isDuplicate).toEqual(YesNo.Y);
+  });
+
+  it('should correctly identify groups',() => {
+    component.mediaItemsForGrouping = [];
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',moment(),'456','654'),2,component.timeDiffGroup + 1);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping1);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping2);
+    component.identifyGroups();
     expect(component.mediaItemsGroups.length).toEqual(2);
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping.length).toEqual(1);
     expect(component.mediaItemsGroups[1].mediaItemsForGrouping.length).toEqual(1);
-    expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0]).toEqual(mediaItem1);
-    expect(component.mediaItemsGroups[1].mediaItemsForGrouping[1]).toEqual(mediaItem2);
-  });*/
+    expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0]).toEqual(mediaItemForGrouping1);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0]).toEqual(mediaItemForGrouping2);
+  });
 
 });
