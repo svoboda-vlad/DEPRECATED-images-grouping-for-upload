@@ -83,12 +83,16 @@ export class ImagesGroupingComponent implements OnInit {
   readFileUrl(readerBytes: FileReader, file: File): void {
     let readerUrl: FileReader = new FileReader();
     readerUrl.addEventListener('load', (event: any) => {
-      this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
+      this.createMediaItem(file, readerBytes, readerUrl);
     }, false);
     readerUrl.readAsDataURL(file);
   }
 
-  createGroups() : void {
+  createMediaItem(file: File, readerBytes: FileReader, readerUrl: FileReader): void {
+    this.mediaItems.push(new MediaItem(file.name, moment(file.name, "YYYYMMDD HHmmss"), readerBytes.result, readerUrl.result));
+  }
+
+  createGroups(): void {
     this.getMediaItemsForGrouping();
     this.calculateTimeDiff();
     this.identifyDuplicates();

@@ -56,13 +56,18 @@ describe('ImagesGroupingComponent', () => {
   it('should call readAsArrayBuffer method of FileReader', () => {
     const readAsArrayBufferSpy = spyOn(FileReader.prototype, 'readAsArrayBuffer');
     component.readFileBytes(file);
-    expect(readAsArrayBufferSpy.calls.count()).toEqual(1);
+    expect(readAsArrayBufferSpy).toHaveBeenCalledWith(file);
   });
 
   it('should call readAsDataURL method of FileReader', () => {
     const readAsDataURLSpy = spyOn(FileReader.prototype, 'readAsDataURL');
     component.readFileUrl(new FileReader(), file);
-    expect(readAsDataURLSpy.calls.count()).toEqual(1);
+    expect(readAsDataURLSpy).toHaveBeenCalledWith(file);
+  });
+
+  it('should create new media item', () => {
+    component.createMediaItem(file, new FileReader(), new FileReader());
+    expect(component.mediaItems[0].name).toEqual(file.name);
   });
 
 });
