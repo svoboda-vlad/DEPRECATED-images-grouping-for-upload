@@ -4,7 +4,7 @@
 <p>https://www.googleapis.com/auth/photoslibrary.appendonly</p>
 <form [formGroup]="uploadForm">
   <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br/>
-  <input id="accessToken" type="text" formControlName="accessToken"/>
+  <input id="accessToken" type="text" formControlName="accessToken" (blur)="saveAccessToken()/>
 </form>
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
 <p *ngIf="filesCount > 0">{{mediaItems.length}} of {{filesCount}} files processed</p>

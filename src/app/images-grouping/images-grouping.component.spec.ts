@@ -6,26 +6,34 @@ import { ImagesGroupingComponent, MediaItemsGroup } from './images-grouping.comp
 import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MediaItem, MediaItemForGrouping, YesNo } from './media-item.service';
+import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService } from './media-item.service';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
   let fixture: ComponentFixture<ImagesGroupingComponent>;
   let resizeImagesSpy: jasmine.Spy;
   let file: File;
+  let uploadToken: string;
+  let uploadsSpy: jasmine.Spy;
+  let batchCreateSpy: jasmine.Spy;
 
   beforeEach(async(() => {
     const blob = new Blob(['123'], { type: 'text/html' });
     blob['lastModifiedDate'] = '';
     blob['name'] = 'filename';
     file = <File>blob;
-    const serviceSpy = jasmine.createSpyObj('NgxPicaService', ['resizeImages']);
-    resizeImagesSpy = serviceSpy.resizeImages.and.returnValue(of(file));
+    const picaServiceSpy = jasmine.createSpyObj('NgxPicaService', ['resizeImages']);
+    resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
+    uploadToken = 'ABC';
+    const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
+    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken).toPromise());
+    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of().toPromise());
 
     TestBed.configureTestingModule({
       declarations: [ ImagesGroupingComponent ],
       imports: [ HttpClientTestingModule, ReactiveFormsModule ],
-      providers: [{ provide: NgxPicaService, useValue: serviceSpy }]
+      providers: [{ provide: NgxPicaService, useValue: picaServiceSpy },
+      { provide: MediaItemService, useValue: mediaServiceSpy }]
     })
     .compileComponents();
   }));
@@ -165,6 +173,19 @@ describe('ImagesGroupingComponent', () => {
     );
     component.changeIsDuplicate(component.mediaItemsGroups[0],component.mediaItemsGroups[0].mediaItemsForGrouping[0]);
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.Y);
+  });
+
+  it('should call uploads api', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name')
+    );
+    component.accessToken = '123';
+    component.createMedia();
+    expect(uploadsSpy.calls.count()).toEqual(1);
+    expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
   });
 
 });

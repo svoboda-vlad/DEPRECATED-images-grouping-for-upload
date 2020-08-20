@@ -5,6 +5,7 @@ import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-
 import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
+import { access } from 'fs';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -20,8 +21,9 @@ export class ImagesGroupingComponent implements OnInit {
   timeDiffGroup = 3600;
   uploadToken: string;
   uploadForm = this.fb.group({
-    accessToken: ['']
+    accessToken: ''
   });
+  accessToken: string;
   filesLoaded: boolean = false;
   filesCount: number;
   groupsCreated: boolean = false;
@@ -43,7 +45,6 @@ export class ImagesGroupingComponent implements OnInit {
     private albumService: AlbumService) { }
 
   ngOnInit(): void {
-
   }
 
   processFiles(files: FileList): void {
@@ -216,8 +217,8 @@ export class ImagesGroupingComponent implements OnInit {
     this.mediaItemsGroups.forEach((group) => {
       group.mediaItemsForGrouping.forEach((item) => {
         if (item.isDuplicate === YesNo.N) {
-          this.mediaItemService.uploads(item.mediaItem, this.getAccessToken()).then((uploadToken) => {
-            this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.getAccessToken(), group.albumId).then(() => item.mediaItem.uploadSuccess = true);
+          this.mediaItemService.uploads(item.mediaItem, this.accessToken).then((uploadToken) => {
+            this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
           });
         }
       })
@@ -226,14 +227,14 @@ export class ImagesGroupingComponent implements OnInit {
 
   createAlbums(): void {
     this.mediaItemsGroups.forEach((group) => {
-      this.albumService.albums(group, this.getAccessToken()).subscribe((album) => {
+      this.albumService.albums(group, this.accessToken).subscribe((album) => {
         group.albumId = album.id;
       });
     });
   }
 
-  getAccessToken(): any {
-    return this.uploadForm.get(['accessToken']).value;
+  saveAccessToken(): any {
+    this.accessToken = this.uploadForm.get(['accessToken']).value;
   }
 
 }
