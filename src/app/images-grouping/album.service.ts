@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
-import { Observable } from 'rxjs';
-
-const urlAlbums = 'https://photoslibrary.googleapis.com/v1/albums';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AlbumService {
+  public albumsUrl = 'https://photoslibrary.googleapis.com/v1/albums';
 
   constructor(private http: HttpClient) { }
 
@@ -24,7 +24,17 @@ export class AlbumService {
       "album": album
     }
 
-    return this.http.post<IAlbum>(urlAlbums, body, httpOptions);
+    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
+    .pipe(
+      catchError(this.handleError<IAlbum>('albums', null))
+      );
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      return of(result as T);
+    };
   }
 
 }

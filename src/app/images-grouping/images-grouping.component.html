@@ -4,13 +4,14 @@
 <p>https://www.googleapis.com/auth/photoslibrary.appendonly</p>
 <form [formGroup]="uploadForm">
   <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br/>
-  <input id="accessToken" type="text" formControlName="accessToken"/>
+  <input id="accessToken" type="text" formControlName="accessToken" (blur)="saveAccessToken()"/>
 </form>
 <input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
-<p *ngIf="mediaItems.length > 0">{{mediaItems.length}} files in total</p>
-<p *ngIf="getUniqueMediaItemsCount() > 0">{{getUniqueMediaItemsCount()}} files without duplicates in {{mediaItemsGroups.length}} groups</p>
+<p *ngIf="filesCount">{{mediaItems.length}} of {{filesCount}} files processed</p>
+<p *ngIf="filesLoaded"><button (click)="createGroups()" [disabled]="groupsCreated">Create groups</button></p>
+<p *ngIf="getUniqueMediaItemsCount()">{{getUniqueMediaItemsCount()}} files without duplicates in {{mediaItemsGroups.length}} groups</p>
 
-<table *ngIf="mediaItemsGroups.length > 0">
+<table *ngIf="mediaItemsGroups.length">
   <th>Group</th>
   <th>Files</th>
   <th>Uploaded</th>
@@ -24,8 +25,8 @@
     <td>{{ group.albumId }}</td>
   </tr>
 </table>
-<p><button (click)="createAlbums()">Create albums</button></p>
-<p><button (click)="createMedia()">Upload files</button></p>
+<p *ngIf="mediaItemsGroups.length"><button (click)="createAlbums()">Create albums</button></p>
+<p *ngIf="mediaItemsGroups.length"><button (click)="createMedia()">Upload files</button></p>
 <p></p>
 <div *ngFor="let group of mediaItemsGroups">
   <div><b>{{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</b></div>
