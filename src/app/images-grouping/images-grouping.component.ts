@@ -225,7 +225,7 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   callCreateBatch(item: IMediaItem, uploadToken: string, albumId: string): Promise<any> {
-    return this.mediaItemService.batchCreate(item, uploadToken, albumId);
+    return this.mediaItemService.batchCreate(item, uploadToken, this.accessToken, albumId);
   }
 
   createAlbums(): void {

@@ -209,7 +209,7 @@ describe('ImagesGroupingComponent', () => {
     component.accessToken = '123';
     component.callCreateBatch(component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem,uploadToken, '').then(() => {
       expect(batchCreateSpy.calls.count()).toEqual(1);
-      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, uploadToken, '']);
+      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, '']);
     });
   });
 
