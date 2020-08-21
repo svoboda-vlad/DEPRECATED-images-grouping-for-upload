@@ -55,7 +55,7 @@ export class ImagesGroupingComponent implements OnInit {
     }
   }
 
-  emptyArrays() : void {
+  private emptyArrays() : void {
     this.mediaItems = [];
     this.mediaItemsForGrouping = [];
     this.mediaItemsGroups = [];
@@ -218,11 +218,15 @@ export class ImagesGroupingComponent implements OnInit {
       group.mediaItemsForGrouping.forEach((item) => {
         if (item.isDuplicate === YesNo.N) {
           this.mediaItemService.uploads(item.mediaItem, this.accessToken).then((uploadToken) => {
-            this.mediaItemService.batchCreate(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
+            this.callCreateBatch(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
           });
         }
       })
     });
+  }
+
+  callCreateBatch(item: IMediaItem, uploadToken: string, albumId: string): Promise<any> {
+    return this.mediaItemService.batchCreate(item, uploadToken, albumId);
   }
 
   createAlbums(): void {

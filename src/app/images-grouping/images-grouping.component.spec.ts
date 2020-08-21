@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService } from './media-item.service';
+import { AlbumService, Album } from './album.service';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
@@ -16,6 +17,7 @@ describe('ImagesGroupingComponent', () => {
   let uploadToken: string;
   let uploadsSpy: jasmine.Spy;
   let batchCreateSpy: jasmine.Spy;
+  let albumsSpy: jasmine.Spy;
 
   beforeEach(async(() => {
     const blob = new Blob(['123'], { type: 'text/html' });
@@ -28,12 +30,15 @@ describe('ImagesGroupingComponent', () => {
     const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
     uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken).toPromise());
     batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of().toPromise());
+    const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
+    albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('')));
 
     TestBed.configureTestingModule({
       declarations: [ ImagesGroupingComponent ],
       imports: [ HttpClientTestingModule, ReactiveFormsModule ],
       providers: [{ provide: NgxPicaService, useValue: picaServiceSpy },
-      { provide: MediaItemService, useValue: mediaServiceSpy }]
+      { provide: MediaItemService, useValue: mediaServiceSpy },
+      { provide: AlbumService, useValue: albumServiceSpy }]
     })
     .compileComponents();
   }));
@@ -186,6 +191,34 @@ describe('ImagesGroupingComponent', () => {
     component.createMedia();
     expect(uploadsSpy.calls.count()).toEqual(1);
     expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+  });
+
+  it('should call batchCreate api', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name')
+    );
+    component.accessToken = '123';
+    component.callCreateBatch(component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem,uploadToken, '').then(() => {
+      expect(batchCreateSpy.calls.count()).toEqual(1);
+      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, uploadToken, '']);
+    });
+  });
+
+  it('should call albums api', () => {
+    component.mediaItemsGroups = [];
+    const albumId = 'album 123';
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name', albumId)
+    );
+    component.accessToken = '123';
+    component.createAlbums();
+    expect(albumsSpy.calls.count()).toEqual(1);
+    expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
   });
 
 });
