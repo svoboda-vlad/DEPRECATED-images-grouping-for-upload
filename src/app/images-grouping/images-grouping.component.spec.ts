@@ -6,7 +6,7 @@ import { ImagesGroupingComponent, MediaItemsGroup } from './images-grouping.comp
 import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService } from './media-item.service';
+import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService, IMediaItem } from './media-item.service';
 import { AlbumService, Album } from './album.service';
 
 describe('ImagesGroupingComponent', () => {
@@ -89,12 +89,15 @@ describe('ImagesGroupingComponent', () => {
     component.mediaItemsForGrouping = [];
     const mediaItem1 = new MediaItem('name B',moment(),'123','321');
     const mediaItem2 = new MediaItem('name A',moment(),'456','654');
+    const mediaItem3 = new MediaItem('name C',moment(),'678','876');
     component.mediaItems.push(mediaItem1);
     component.mediaItems.push(mediaItem2);
+    component.mediaItems.push(mediaItem3);
     component.createMediaItemsForGrouping();
-    expect(component.mediaItemsForGrouping.length).toEqual(2);
+    expect(component.mediaItemsForGrouping.length).toEqual(3);
     expect(component.mediaItemsForGrouping[0].mediaItem).toEqual(mediaItem2);
     expect(component.mediaItemsForGrouping[1].mediaItem).toEqual(mediaItem1);
+    expect(component.mediaItemsForGrouping[2].mediaItem).toEqual(mediaItem3);
   });
 
   it('should calculate correct time differences between files', () => {
@@ -130,14 +133,17 @@ describe('ImagesGroupingComponent', () => {
     component.mediaItemsForGrouping = [];
     const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0);
     const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',moment(),'456','654'),2,component.timeDiffGroup + 1);
+    const mediaItemForGrouping3 = new MediaItemForGrouping(new MediaItem('name C',moment(),'678','876'),3,component.timeDiffGroup - 1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping2);
+    component.mediaItemsForGrouping.push(mediaItemForGrouping3);
     component.identifyGroups();
     expect(component.mediaItemsGroups.length).toEqual(2);
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping.length).toEqual(1);
-    expect(component.mediaItemsGroups[1].mediaItemsForGrouping.length).toEqual(1);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping.length).toEqual(2);
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0]).toEqual(mediaItemForGrouping1);
     expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0]).toEqual(mediaItemForGrouping2);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping[1]).toEqual(mediaItemForGrouping3);
   });
 
   it('should return correct unique items count', () => {
@@ -219,6 +225,26 @@ describe('ImagesGroupingComponent', () => {
     component.createAlbums();
     expect(albumsSpy.calls.count()).toEqual(1);
     expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+  });
+
+  it('should save access token', () => {
+    const accessToken = 'abc';
+    component.uploadForm.controls['accessToken'].setValue(accessToken);
+    component.saveAccessToken();
+    expect(component.accessToken).toEqual(accessToken);
+  });
+
+  it('should return correct uploaded count', () => {
+    const uploadedCount = 2;
+    let mediaItem1: IMediaItem = new MediaItem('name A', moment(),'123','321');
+    mediaItem1.uploadSuccess = true;
+    let mediaItem2: IMediaItem = new MediaItem('name B', moment(),'456','654');
+    mediaItem2.uploadSuccess = true;
+    const group = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(mediaItem1,1,0,YesNo.N),
+      new MediaItemForGrouping(mediaItem2,1,0,YesNo.N)
+    ],'group name', '');
+    expect(group.getUploadedCount()).toEqual(uploadedCount);
   });
 
 });

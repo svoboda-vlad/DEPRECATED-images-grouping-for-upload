@@ -5,7 +5,6 @@ import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-
 import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
-import { access } from 'fs';
 
 @Component({
   selector: 'igfu-images-grouping',
