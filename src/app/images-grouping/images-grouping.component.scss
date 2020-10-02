@@ -1,7 +1,3 @@
-* {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 .group {
   display: flex;
   flex-wrap: wrap;
@@ -12,13 +8,12 @@
   margin: 10px;
 }
 
-.img {
+.img, .img-duplicate {
   max-width: 250px;
 }
 
 .img-duplicate {
   filter: grayscale(100%);
-  max-width: 250px;
 }
 
 table {
@@ -34,4 +29,8 @@ th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
+}
+
+.my-width {
+  max-width: 400px
 }

@@ -22,6 +22,9 @@ export class ImagesGroupingComponent implements OnInit {
   uploadForm = this.fb.group({
     accessToken: ''
   });
+  inputFilesForm = this.fb.group({
+    inputFiles: ''
+  });
   accessToken: string;
   filesLoaded: boolean = false;
   filesCount: number;

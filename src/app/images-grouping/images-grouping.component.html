@@ -1,17 +1,46 @@
 <h2>Grouping Images</h2>
-<p>Get access token to Google Photos from: <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a></p>
-<p>Authorize APIs:</p>
-<p>https://www.googleapis.com/auth/photoslibrary.appendonly</p>
-<form [formGroup]="uploadForm">
-  <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br/>
-  <input id="accessToken" type="text" formControlName="accessToken" (blur)="saveAccessToken()"/>
-</form>
-<input #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
-<p *ngIf="filesCount">{{mediaItems.length}} of {{filesCount}} files processed</p>
-<p *ngIf="filesLoaded"><button (click)="createGroups()" [disabled]="groupsCreated">Create groups</button></p>
-<p *ngIf="getUniqueMediaItemsCount()">{{getUniqueMediaItemsCount()}} files without duplicates in {{mediaItemsGroups.length}} groups</p>
 
-<table *ngIf="mediaItemsGroups.length">
+<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
+  <div class="card-body">
+    <h5 class="card-title">How to get access token to Google Photos</h5>
+    <p class="card-text">1) Open <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a></p>
+    <h6 class="card-subtitle mb-2 text-muted">On OAuth 2.0 Playground page</h6>
+    <p class="card-text">2) In section "Step 1 Select & authorize APIs", copy the text below to <kbd>Input your own scopes</kbd> field<br/>
+      <code>https://www.googleapis.com/auth/photoslibrary.appendonly</code>
+    </p>
+    <p class="card-text">3) Click on <kbd>Authorize APIs</kbd> button</p>
+    <p class="card-text">4) Log in to your Google account</p>
+    <p class="card-text">5) On "Google OAuth 2.0 Playground wants to access your Google Account" screen, click on <kbd>Allow</kbd> button</p>
+    <p class="card-text">6) In section "Step 2 Exchange authorization code for tokens", click on <kbd>Exchange authorization code for tokens</kbd> button</p>
+    <p class="card-text">7) Copy token from <kbd>Access token</kbd> field</p>
+    <h6 class="card-subtitle mb-2 text-muted">On this page</h6>
+    <p class="card-text">8) Paste the token to <kbd>Access Token (from OAuth 2.0 Playground)</kbd> field</p>
+  </div>
+</div>
+
+<form [formGroup]="uploadForm">
+  <div class="form-group my-width mx-auto">
+    <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br/>
+    <input class="form-control" id="accessToken" type="text" formControlName="accessToken" (blur)="saveAccessToken()"/>
+  </div>
+</form>
+
+<form [formGroup]="inputFilesForm">
+  <div class="form-group my-width mx-auto">
+    <label for="inputFiles">Input files (images)</label><br/>
+    <input class="form-control" id="inputFiles" #file type="file" accept='image/*' (change)="processFiles(file.files)" multiple/>
+  </div>
+</form>
+
+<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="filesCount">
+  <div class="card-body">
+    <p class="card-text" *ngIf="filesCount">{{mediaItems.length}} of {{filesCount}} files processed</p>
+    <p *ngIf="filesLoaded"><button class="form-control" (click)="createGroups()" [disabled]="groupsCreated">Create groups</button></p>
+    <p class="card-text" *ngIf="getUniqueMediaItemsCount()">{{getUniqueMediaItemsCount()}} files without duplicates in {{mediaItemsGroups.length}} groups</p>
+  </div>
+</div>
+
+<table *ngIf="mediaItemsGroups.length" class="table table-striped my-width mx-auto">
   <th>Group</th>
   <th>Files</th>
   <th>Uploaded</th>
@@ -25,11 +54,16 @@
     <td>{{ group.albumId }}</td>
   </tr>
 </table>
-<p *ngIf="mediaItemsGroups.length"><button (click)="createAlbums()">Create albums</button></p>
-<p *ngIf="mediaItemsGroups.length"><button (click)="createMedia()">Upload files</button></p>
-<p></p>
+
+<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="mediaItemsGroups.length">
+  <div class="card-body">
+    <p *ngIf="mediaItemsGroups.length" class="card-text"><button (click)="createAlbums()">Create albums</button></p>
+    <p *ngIf="mediaItemsGroups.length" class="card-text"><button (click)="createMedia()">Upload files</button></p>
+  </div>
+</div>
+
 <div *ngFor="let group of mediaItemsGroups">
-  <div><b>{{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</b></div>
+  <div class="text-primary">{{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
   <div class="group">
     <div class="file" *ngFor="let item of group.mediaItemsForGrouping">
       {{ item.mediaItem.dateTime | date:'HH:mm:ss' }}<br/>
