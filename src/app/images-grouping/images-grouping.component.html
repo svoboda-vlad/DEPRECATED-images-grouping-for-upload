@@ -10,73 +10,86 @@
 
 <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="filesCount">
   <div class="card-body">
-    <p class="card-text" *ngIf="filesCount">
-      {{ mediaItems.length }} of {{ filesCount }} files processed
-    </p>
+    <p class="card-text text-danger" *ngIf="mediaItems.length != filesCount">Resizing in progress
+      ({{ mediaItems.length }} of {{ filesCount }})</p>
+    <p class="card-text text-primary" *ngIf="mediaItems.length == filesCount">Finished: {{ mediaItems.length }} files
+      resized to {{ resizeWidth }}x{{ resizeHeight }}px.</p>
   </div>
 </div>
 
-<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="filesLoaded">
-  <div class="card-body">
-    <button class="btn btn-primary mb-2" (click)="createGroups()" [disabled]="groupsCreated">
-      Create groups
-    </button>
-    <p class="card-text" *ngIf="getUniqueMediaItemsCount()">
-      {{ getUniqueMediaItemsCount() }} files without duplicates in
-      {{ mediaItemsGroups.length }} groups
-    </p>
-  </div>
-</div>
-
-<div class="my-width-groups mx-auto">
-  <div *ngFor="let group of mediaItemsGroups" class="border p-3 mb-2">
-    <div class="text-primary my-width mx-auto">
-      {{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files
-      (of {{ group.mediaItemsForGrouping.length }})
+<div *ngIf="filesLoaded">
+  <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
+    <div class="card-body">
+      <button class="btn btn-primary mb-2" (click)="createGroups()" [disabled]="groupsCreated">
+        Create groups
+      </button>
+      <p class="card-text" *ngIf="getUniqueMediaItemsCount()">
+        {{ getUniqueMediaItemsCount() }} files without duplicates in
+        {{ mediaItemsGroups.length }} groups
+      </p>
     </div>
-    <div class="group">
-      <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
-        {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-        <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }"
-          [src]="item.mediaItem.contentUrl" /><br />
-        <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
-          {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button><br />
-        <div>
-          {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+  </div>
+</div>
+
+<div *ngIf="getUniqueMediaItemsCount()">
+  <h3 class="my-width mx-auto">Images in groups</h3>
+
+  <div class="my-width-groups mx-auto">
+    <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
+      <div class="card-header">
+        <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
+        <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
+      </div>
+
+      <div class="card-body group">
+        <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
+          {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
+          <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }"
+            [src]="item.mediaItem.contentUrl" /><br />
+          <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
+            {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button><br />
+          <div>
+            {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </div>
 
-<table *ngIf="mediaItemsGroups.length" class="table table-bordered my-width mx-auto p-3 mb-2">
-  <th>Group</th>
-  <th>Files</th>
-  <th>Uploaded</th>
-  <th>Days</th>
-  <th>Album ID</th>
-  <tr *ngFor="let group of mediaItemsGroups">
-    <td #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">
-      {{ group.name }}
-    </td>
-    <td>{{ group.getCountWithoutDuplicates() }}</td>
-    <td>{{ group.getUploadedCount() }}</td>
-    <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
-    <td>{{ group.albumId }}</td>
-  </tr>
-</table>
+<div *ngIf="mediaItemsGroups.length">
+  <h3 class="my-width mx-auto">Groups overview</h3>
 
-<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="mediaItemsGroups.length">
-  <div class="card-body">
-    <p class="card-text">
-      <button (click)="createAlbums()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums</button>
-    </p>
-    <p class="card-text">
-      <button (click)="createMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Upload files</button>
-    </p>
-    <p class="card-text text-danger" *ngIf="!accessToken">
-      Please enter access token
-    </p>
+  <table class="table table-bordered my-width mx-auto p-3 mb-2">
+    <th>Group</th>
+    <th>Files</th>
+    <th>Uploaded</th>
+    <th>Days</th>
+    <th>Album</th>
+    <tr *ngFor="let group of mediaItemsGroups">
+      <td>
+        {{ group.name }}
+      </td>
+      <td>{{ group.getCountWithoutDuplicates() }}</td>
+      <td>{{ group.getUploadedCount() }}</td>
+      <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
+      <td>{{ group.albumId ? 'CREATED' : 'not created' }}</td>
+    </tr>
+  </table>
+
+  <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
+    <div class="card-body">
+      <p class="card-text">
+        <button (click)="createAlbums()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums</button>
+      </p>
+      <p class="card-text">
+        <button (click)="createMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Upload files</button>
+      </p>
+      <p class="card-text text-danger" *ngIf="!accessToken">
+        Please enter access token
+      </p>
+    </div>
   </div>
 </div>
 

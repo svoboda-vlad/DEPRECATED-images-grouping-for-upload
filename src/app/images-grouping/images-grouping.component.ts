@@ -145,7 +145,7 @@ export class ImagesGroupingComponent implements OnInit {
     let group: IMediaItemsGroup;
     let id = 1;
     this.mediaItemsForGrouping.forEach((item, i) => {
-      let groupName: string = "(nenasdíleno) " + item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
+      let groupName: string = "(new) " + item.mediaItem.dateTime.format('YYYY-MM-DD') + " místo (" + item.mediaItem.dateTime.format('dddd H') + 'h)';
       groupName = this.translateWeekdayNamesToCzech(groupName);
       // if the first file in the sequence, create a new group
       if (i === 0) {
