@@ -35,12 +35,12 @@
   <h3 class="my-width mx-auto">Images in groups</h3>
 
   <div class="my-width-groups mx-auto">
-    <div *ngFor="let group of mediaItemsGroups" class="border p-3 mb-2">
-      <div class="text-primary my-width mx-auto">
+    <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
+      <div class="card-header">
         {{ group.name }} - {{ group.getCountWithoutDuplicates() }} unique files
         (of {{ group.mediaItemsForGrouping.length }})
       </div>
-      <div class="group">
+      <div class="card-body group">
         <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
           {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
           <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }"
