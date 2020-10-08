@@ -15,9 +15,9 @@ export class ImagesGroupingComponent implements OnInit {
 
   mediaItems: IMediaItem[] = [];
   mediaItemsForGrouping: IMediaItemForGrouping[] = [];
-  timeDiffDuplicate = 10;
+  timeDiffDuplicate = 5;
   mediaItemsGroups: IMediaItemsGroup[] = [];
-  timeDiffGroup = 3600;
+  timeDiffGroup = 1800;
   uploadToken: string;
   uploadForm = this.fb.group({
     accessToken: ''
@@ -38,8 +38,8 @@ export class ImagesGroupingComponent implements OnInit {
       keepAspectRatio: true
     }
   };
-  resizeWidth = 800;
-  resizeHeight = 800;
+  resizeWidth = 1000;
+  resizeHeight = 1000;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -241,6 +241,10 @@ export class ImagesGroupingComponent implements OnInit {
 
   saveAccessToken(): any {
     this.accessToken = this.uploadForm.get(['accessToken']).value;
+  }
+
+  removeGroup(gr: IMediaItemsGroup) {
+    this.mediaItemsGroups.splice(this.mediaItemsGroups.indexOf(gr),1);
   }
 
 }
