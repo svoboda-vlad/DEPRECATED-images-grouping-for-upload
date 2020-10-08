@@ -247,4 +247,20 @@ describe('ImagesGroupingComponent', () => {
     expect(group.getUploadedCount()).toEqual(uploadedCount);
   });
 
+  it('should remove group', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name 1'),
+      new MediaItemsGroup(2, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name B', moment(),'456','654'),1,0,YesNo.N)
+      ],'group name 2')
+    );
+    const originalLength = component.mediaItemsGroups.length;
+    component.removeGroup(component.mediaItemsGroups[0]);
+    expect(component.mediaItemsGroups.length).toEqual(originalLength - 1);
+  });
+
+
 });
