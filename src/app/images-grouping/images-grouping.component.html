@@ -82,10 +82,7 @@
   <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
     <div class="card-body">
       <p class="card-text">
-        <button (click)="createAlbums()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums</button>
-      </p>
-      <p class="card-text">
-        <button (click)="createMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Upload files</button>
+        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums and upload files</button>
       </p>
       <p class="card-text text-danger" *ngIf="!accessToken">
         Please enter access token
