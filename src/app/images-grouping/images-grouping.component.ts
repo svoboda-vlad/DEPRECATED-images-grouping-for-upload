@@ -214,29 +214,29 @@ export class ImagesGroupingComponent implements OnInit {
     .replace("Sunday","neděle");
   }
 
-  createMedia(): void {
-    // converted to async/await promises to ensure sequential upload
+  createAlbumsAndMedia(): void {
     this.mediaItemsGroups.forEach((group) => {
+      this.albumService.albums(group, this.accessToken).subscribe((album) => {
+        group.albumId = album.id;
+        this.createMedia(group);
+      });
+    });
+  }
+
+
+  createMedia(group: IMediaItemsGroup): void {
+    // converted to async/await promises to ensure sequential upload
       group.mediaItemsForGrouping.forEach((item) => {
         if (item.isDuplicate === YesNo.N) {
           this.mediaItemService.uploads(item.mediaItem, this.accessToken).then((uploadToken) => {
             this.callCreateBatch(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
           });
         }
-      })
-    });
+      });
   }
 
   callCreateBatch(item: IMediaItem, uploadToken: string, albumId: string): Promise<any> {
     return this.mediaItemService.batchCreate(item, uploadToken, this.accessToken, albumId);
-  }
-
-  createAlbums(): void {
-    this.mediaItemsGroups.forEach((group) => {
-      this.albumService.albums(group, this.accessToken).subscribe((album) => {
-        group.albumId = album.id;
-      });
-    });
   }
 
   saveAccessToken(): any {

@@ -48,15 +48,23 @@ export class MediaItemService {
       ]
     }
 
-    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(this.handleError<any>('batchCreate', null))).toPromise();
+    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(error => this.handleError(error))).toPromise();
   }
 
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
-    };
+  /** Error handler */
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      // A client-side error.
+      console.error('An error occurred:', error.error.message);
+    } else {
+      // The backend error.
+      console.error('An error occurred:', error.error.message);
+      return throwError(error);
+    }
+    // return a custom error message
+    return throwError('Something bad happened; please try again later.');
   }
+
 
 }
 
@@ -70,7 +78,7 @@ export interface IMediaItem {
 
 export class MediaItem implements IMediaItem {
   uploadSuccess: boolean = false;
-  constructor(public name: string, public dateTime: moment.Moment, public contentBytes: string | ArrayBuffer, public contentUrl: string | ArrayBuffer) {}
+  constructor(public name: string, public dateTime: moment.Moment, public contentBytes: string | ArrayBuffer, public contentUrl: string | ArrayBuffer) { }
 }
 
 export interface IMediaItemForGrouping {
@@ -81,7 +89,7 @@ export interface IMediaItemForGrouping {
 }
 
 export class MediaItemForGrouping implements IMediaItemForGrouping {
-  constructor(public mediaItem: IMediaItem, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) {}
+  constructor(public mediaItem: IMediaItem, public seqNo: number, public timeDiff: number, public isDuplicate: YesNo = YesNo.N) { }
 }
 
 export const enum YesNo {

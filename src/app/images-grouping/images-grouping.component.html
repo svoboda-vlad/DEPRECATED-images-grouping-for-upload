@@ -1,4 +1,4 @@
-<h2 class="my-width mx-auto">Grouping Images</h2>
+<h2 class="my-width mx-auto">Grouping and resizing images for uploading to Google Photos</h2>
 
 <form [formGroup]="inputFilesForm">
   <div class="form-group my-width mx-auto">
@@ -79,13 +79,12 @@
     </tr>
   </table>
 
+  <h3 class="my-width mx-auto">Upload to Google Photos</h3>
+
   <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
     <div class="card-body">
       <p class="card-text">
-        <button (click)="createAlbums()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums</button>
-      </p>
-      <p class="card-text">
-        <button (click)="createMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Upload files</button>
+        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums and upload files</button>
       </p>
       <p class="card-text text-danger" *ngIf="!accessToken">
         Please enter access token

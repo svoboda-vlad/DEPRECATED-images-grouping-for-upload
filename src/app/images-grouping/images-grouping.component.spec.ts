@@ -187,16 +187,13 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should call uploads api', () => {
-    component.mediaItemsGroups = [];
-    component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
+    const group = new MediaItemsGroup(1, moment(),moment(),[
         new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name')
-    );
+      ],'group name');
     component.accessToken = '123';
-    component.createMedia();
+    component.createMedia(group);
     expect(uploadsSpy.calls.count()).toEqual(1);
-    expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+    expect(uploadsSpy.calls.argsFor(0)).toEqual([group.mediaItemsForGrouping[0].mediaItem, component.accessToken]);
   });
 
   it('should call batchCreate api', () => {
@@ -222,7 +219,7 @@ describe('ImagesGroupingComponent', () => {
       ],'group name', albumId)
     );
     component.accessToken = '123';
-    component.createAlbums();
+    component.createAlbumsAndMedia();
     expect(albumsSpy.calls.count()).toEqual(1);
     expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
   });

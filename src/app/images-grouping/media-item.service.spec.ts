@@ -16,10 +16,10 @@ describe('MediaService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ HttpClientTestingModule ]
+      imports: [HttpClientTestingModule]
     });
     service = TestBed.inject(MediaItemService);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
 
     accessToken = '12345';
     item = new MediaItem('item', moment(), 'abc', 'cde');
@@ -87,15 +87,20 @@ describe('MediaService', () => {
   });
 
   it('should return null when HTTP request fails', () => {
+    const emsg = 'deliberate 404 error';
     // 1) should return null (not an error)
     service.batchCreate(item, uploadToken, accessToken, albumId).then(
-      data => expect(data).toEqual(null),
-      fail
+      data => fail('should have failed with the 404 error'),
+      (error: HttpErrorResponse) => {
+        expect(error.status).toEqual(404, 'status');
+        expect(error.error).toEqual(emsg, 'message');
+      }
     );
+
     // 2) should call api once
     const req = httpMock.expectOne(service.batchCreateUrl);
     // mocked HTTP response
-    req.flush('deliberate 404 error', { status: 404, statusText: 'Not Found' });
+    req.flush(emsg, { status: 404, statusText: 'Not Found' });
     // should not be any outstanding requests
     httpMock.verify();
   });
