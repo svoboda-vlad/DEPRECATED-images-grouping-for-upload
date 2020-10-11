@@ -213,11 +213,11 @@ describe('ImagesGroupingComponent', () => {
   it('should call albums api', () => {
     component.mediaItemsGroups = [];
     const albumId = 'album 123';
-    component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name', albumId)
-    );
+    const group = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    ],'group name');
+    group.albumId = albumId;
+    component.mediaItemsGroups.push(group);
     component.accessToken = '123';
     component.createAlbumsAndMedia();
     expect(albumsSpy.calls.count()).toEqual(1);
@@ -240,7 +240,7 @@ describe('ImagesGroupingComponent', () => {
     const group = new MediaItemsGroup(1, moment(),moment(),[
       new MediaItemForGrouping(mediaItem1,1,0,YesNo.N),
       new MediaItemForGrouping(mediaItem2,1,0,YesNo.N)
-    ],'group name', '');
+    ],'group name');
     expect(group.getUploadedCount()).toEqual(uploadedCount);
   });
 
@@ -259,5 +259,26 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsGroups.length).toEqual(originalLength - 1);
   });
 
+  it('should change group show value', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name')
+    );
+    component.changeShowGroup(component.mediaItemsGroups[0]);
+    expect(component.mediaItemsGroups[0].show).toEqual(true);
+  });
+
+  it('should change group show value', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name')
+    );
+    component.changeLargePreview(component.mediaItemsGroups[0]);
+    expect(component.mediaItemsGroups[0].largePreview).toEqual(true);
+  });
 
 });
