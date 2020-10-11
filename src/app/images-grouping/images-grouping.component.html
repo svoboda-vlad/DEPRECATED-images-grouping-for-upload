@@ -37,7 +37,8 @@
   <div class="my-width-groups mx-auto">
     <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
       <div class="card-header">
-        <button (click)="showHideGroup(group)">{{ group.show ? 'Hide images' : 'Show images' }}</button>
+        <button (click)="changeShowGroup(group)" class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button>
+        <button (click)="changeLargePreview(group)" class="btn btn-primary mb-2" *ngIf="group.show">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
         <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
         <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
         <button (click)="removeGroup(group)" class="btn btn-primary mb-2" *ngIf="group.show">Remove group</button>
@@ -46,7 +47,7 @@
       <div class="card-body group" *ngIf="group.show">
         <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
           {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-          <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }"
+          <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }" [ngClass]="{ 'large-img': group.largePreview }"
             [src]="item.mediaItem.contentUrl" /><br />
           <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
             {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
@@ -106,13 +107,13 @@
   <div class="card-body">
     <p class="card-text">
       1) Open
-      <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a>
+      <a href="https://developers.google.com/oauthplayground/#step1&scopes=https%3A//www.googleapis.com/auth/photoslibrary.appendonly" target="_blank">OAuth 2.0 Playground</a>
     </p>
     <h6 class="card-subtitle mb-2 text-muted">On OAuth 2.0 Playground page</h6>
     <p class="card-text">
-      2) In section "Step 1 Select & authorize APIs", copy the text below to
-      <kbd>Input your own scopes</kbd> field<br />
-      <code>https://www.googleapis.com/auth/photoslibrary.appendonly</code>
+      2) In section "Step 1 Select & authorize APIs", the required scope
+      (<code>https://www.googleapis.com/auth/photoslibrary.appendonly</code>) is already filled in the
+      <kbd>Input your own scopes</kbd> field
     </p>
     <p class="card-text">3) Click on <kbd>Authorize APIs</kbd> button</p>
     <p class="card-text">4) Log in to your Google account</p>

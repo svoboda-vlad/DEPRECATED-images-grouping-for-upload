@@ -247,10 +247,18 @@ export class ImagesGroupingComponent implements OnInit {
     this.mediaItemsGroups.splice(this.mediaItemsGroups.indexOf(gr),1);
   }
 
-  showHideGroup(gr: IMediaItemsGroup): void {
+  changeShowGroup(gr: IMediaItemsGroup): void {
     this.mediaItemsGroups.forEach((group) => {
       if (group.id === gr.id) {
         group.show = !group.show;
+      }
+    });
+  }
+
+  changeLargePreview(gr: IMediaItemsGroup): void {
+    this.mediaItemsGroups.forEach((group) => {
+      if (group.id === gr.id) {
+        group.largePreview = !group.largePreview;
       }
     });
   }
@@ -265,6 +273,7 @@ export interface IMediaItemsGroup {
   name: string;
   albumId?: string;
   show: boolean;
+  largePreview: boolean;
 
   getCountWithoutDuplicates(): number;
   getUploadedCount() : number;
@@ -278,6 +287,7 @@ export class MediaItemsGroup implements IMediaItemsGroup {
   name: string;
   albumId?: string;
   show: boolean;
+  largePreview: boolean;
 
   constructor(id: number, startTime: moment.Moment, endTime: moment.Moment, mediaItemsForGrouping: IMediaItemForGrouping[], name: string) {
     this.id = id;
@@ -286,6 +296,7 @@ export class MediaItemsGroup implements IMediaItemsGroup {
     this.mediaItemsForGrouping = mediaItemsForGrouping;
     this.name = name;
     this.show = false;
+    this.largePreview = false;
   }
 
   getCountWithoutDuplicates(): number {

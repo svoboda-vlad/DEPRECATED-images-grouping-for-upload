@@ -266,8 +266,19 @@ describe('ImagesGroupingComponent', () => {
         new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
       ],'group name')
     );
-    component.showHideGroup(component.mediaItemsGroups[0]);
+    component.changeShowGroup(component.mediaItemsGroups[0]);
     expect(component.mediaItemsGroups[0].show).toEqual(true);
+  });
+
+  it('should change group show value', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      ],'group name')
+    );
+    component.changeLargePreview(component.mediaItemsGroups[0]);
+    expect(component.mediaItemsGroups[0].largePreview).toEqual(true);
   });
 
 });
