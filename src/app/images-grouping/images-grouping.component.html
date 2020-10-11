@@ -37,12 +37,13 @@
   <div class="my-width-groups mx-auto">
     <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
       <div class="card-header">
-        <button (click)="removeGroup(group)" class="btn btn-primary mb-2">Remove group</button>
+        <button (click)="showHideGroup(group)">{{ group.show ? 'Hide images' : 'Show images' }}</button>
         <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
         <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
+        <button (click)="removeGroup(group)" class="btn btn-primary mb-2" *ngIf="group.show">Remove group</button>
       </div>
 
-      <div class="card-body group">
+      <div class="card-body group" *ngIf="group.show">
         <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
           {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
           <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }"

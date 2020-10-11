@@ -243,8 +243,16 @@ export class ImagesGroupingComponent implements OnInit {
     this.accessToken = this.uploadForm.get(['accessToken']).value;
   }
 
-  removeGroup(gr: IMediaItemsGroup) {
+  removeGroup(gr: IMediaItemsGroup): void {
     this.mediaItemsGroups.splice(this.mediaItemsGroups.indexOf(gr),1);
+  }
+
+  showHideGroup(gr: IMediaItemsGroup): void {
+    this.mediaItemsGroups.forEach((group) => {
+      if (group.id === gr.id) {
+        group.show = !group.show;
+      }
+    });
   }
 
 }
@@ -256,13 +264,29 @@ export interface IMediaItemsGroup {
   mediaItemsForGrouping: IMediaItemForGrouping[];
   name: string;
   albumId?: string;
+  show: boolean;
 
   getCountWithoutDuplicates(): number;
   getUploadedCount() : number;
 }
 
 export class MediaItemsGroup implements IMediaItemsGroup {
-  constructor(public id: number, public startTime: moment.Moment, public endTime: moment.Moment, public mediaItemsForGrouping: IMediaItemForGrouping[], public name: string, public albumId?: string) {}
+  id: number;
+  startTime: moment.Moment;
+  endTime: moment.Moment;
+  mediaItemsForGrouping: IMediaItemForGrouping[];
+  name: string;
+  albumId?: string;
+  show: boolean;
+
+  constructor(id: number, startTime: moment.Moment, endTime: moment.Moment, mediaItemsForGrouping: IMediaItemForGrouping[], name: string) {
+    this.id = id;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.mediaItemsForGrouping = mediaItemsForGrouping;
+    this.name = name;
+    this.show = false;
+  }
 
   getCountWithoutDuplicates(): number {
     return this.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N).length;
