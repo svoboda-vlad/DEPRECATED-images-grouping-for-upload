@@ -261,24 +261,35 @@ describe('ImagesGroupingComponent', () => {
 
   it('should change group show value', () => {
     component.mediaItemsGroups = [];
-    component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name')
-    );
+    const group = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    ],'group name');
+    group.show = false;
+    component.mediaItemsGroups.push(group);
     component.changeShowGroup(component.mediaItemsGroups[0]);
     expect(component.mediaItemsGroups[0].show).toEqual(true);
   });
 
-  it('should change group show value', () => {
+  it('should change group large preview value', () => {
     component.mediaItemsGroups = [];
-    component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name')
-    );
+    const group = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    ],'group name');
+    group.largePreview = false;
+    component.mediaItemsGroups.push(group);
     component.changeLargePreview(component.mediaItemsGroups[0]);
     expect(component.mediaItemsGroups[0].largePreview).toEqual(true);
+  });
+
+  it('should change group show only duplicates value', () => {
+    component.mediaItemsGroups = [];
+    const group = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    ],'group name');
+    group.showOnlyDuplicates = false;
+    component.mediaItemsGroups.push(group);
+    component.changeShowOnlyDuplicates(component.mediaItemsGroups[0]);
+    expect(component.mediaItemsGroups[0].showOnlyDuplicates).toEqual(true);
   });
 
 });

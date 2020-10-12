@@ -37,17 +37,21 @@
   <div class="my-width-groups mx-auto">
     <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
       <div class="card-header">
-        <button (click)="changeShowGroup(group)" class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button>
-        <button (click)="changeLargePreview(group)" class="btn btn-primary mb-2" *ngIf="group.show">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
+        <button (click)="changeShowGroup(group)" class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button><br/>
+        <div *ngIf="group.show">
+          <button (click)="changeLargePreview(group)" class="btn btn-secondary mb-2">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
+          <button (click)="changeShowOnlyDuplicates(group)" class="btn btn-secondary mb-2">{{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show only duplicates' }}</button>
+        </div>
         <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
         <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
         <button (click)="removeGroup(group)" class="btn btn-primary mb-2" *ngIf="group.show">Remove group</button>
       </div>
 
       <div class="card-body group" *ngIf="group.show">
-        <div class="file p-3 mb-2" *ngFor="let item of group.mediaItemsForGrouping">
+        <div *ngFor="let item of group.mediaItemsForGrouping">
+          <div class="file p-3 mb-2" *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
           {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-          <img class="img" [ngClass]="{ 'img-duplicate': item.isDuplicate === 'Y' }" [ngClass]="{ 'large-img': group.largePreview }"
+          <img [ngClass]="group.largePreview ? 'large-img': 'small-img'"
             [src]="item.mediaItem.contentUrl" /><br />
           <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
             {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
@@ -55,6 +59,7 @@
             {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>

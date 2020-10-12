@@ -263,6 +263,14 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
+  changeShowOnlyDuplicates(gr: IMediaItemsGroup): void {
+    this.mediaItemsGroups.forEach((group) => {
+      if (group.id === gr.id) {
+        group.showOnlyDuplicates = !group.showOnlyDuplicates;
+      }
+    });
+  }
+
 }
 
 export interface IMediaItemsGroup {
@@ -274,6 +282,7 @@ export interface IMediaItemsGroup {
   albumId?: string;
   show: boolean;
   largePreview: boolean;
+  showOnlyDuplicates: boolean;
 
   getCountWithoutDuplicates(): number;
   getUploadedCount() : number;
@@ -288,6 +297,7 @@ export class MediaItemsGroup implements IMediaItemsGroup {
   albumId?: string;
   show: boolean;
   largePreview: boolean;
+  showOnlyDuplicates: boolean;
 
   constructor(id: number, startTime: moment.Moment, endTime: moment.Moment, mediaItemsForGrouping: IMediaItemForGrouping[], name: string) {
     this.id = id;
@@ -297,6 +307,7 @@ export class MediaItemsGroup implements IMediaItemsGroup {
     this.name = name;
     this.show = false;
     this.largePreview = false;
+    this.showOnlyDuplicates = false;
   }
 
   getCountWithoutDuplicates(): number {
