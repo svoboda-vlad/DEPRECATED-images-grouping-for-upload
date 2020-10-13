@@ -187,13 +187,17 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should call uploads api', () => {
-    const group = new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    const item1 = new MediaItem('name A', moment(),'123','321');
+    item1.uploadSuccess = true;
+    const item2 = new MediaItem('name B', moment(),'456','654');
+    const group = new MediaItemsGroup(1, moment(),moment(), [
+        new MediaItemForGrouping(item1,1,0,YesNo.N),
+        new MediaItemForGrouping(item2,2,0,YesNo.N)
       ],'group name');
     component.accessToken = '123';
     component.createMedia(group);
     expect(uploadsSpy.calls.count()).toEqual(1);
-    expect(uploadsSpy.calls.argsFor(0)).toEqual([group.mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+    expect(uploadsSpy.calls.argsFor(0)).toEqual([group.mediaItemsForGrouping[1].mediaItem, component.accessToken]);
   });
 
   it('should call batchCreate api', () => {
@@ -213,11 +217,14 @@ describe('ImagesGroupingComponent', () => {
   it('should call albums api', () => {
     component.mediaItemsGroups = [];
     const albumId = 'album 123';
-    const group = new MediaItemsGroup(1, moment(),moment(),[
+    const group1 = new MediaItemsGroup(1, moment(),moment(),[
       new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
     ],'group name');
-    group.albumId = albumId;
-    component.mediaItemsGroups.push(group);
+    const group2 = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+    ],'group name');
+    group2.albumId = albumId;
+    component.mediaItemsGroups.push(group1, group2);
     component.accessToken = '123';
     component.createAlbumsAndMedia();
     expect(albumsSpy.calls.count()).toEqual(1);
