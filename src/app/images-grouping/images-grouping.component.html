@@ -37,10 +37,13 @@
   <div class="my-width-groups mx-auto">
     <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
       <div class="card-header">
-        <button (click)="changeShowGroup(group)" class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button><br/>
+        <button (click)="changeShowGroup(group)"
+          class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button><br />
         <div *ngIf="group.show">
-          <button (click)="changeLargePreview(group)" class="btn btn-secondary mb-2">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
-          <button (click)="changeShowOnlyDuplicates(group)" class="btn btn-secondary mb-2">{{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show only duplicates' }}</button>
+          <button (click)="changeLargePreview(group)"
+            class="btn btn-secondary mb-2">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
+          <button (click)="changeShowOnlyDuplicates(group)"
+            class="btn btn-secondary mb-2">{{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show only duplicates' }}</button>
         </div>
         <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
         <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
@@ -49,17 +52,17 @@
 
       <div class="card-body group" *ngIf="group.show">
         <div *ngFor="let item of group.mediaItemsForGrouping">
-          <div class="file p-3 mb-2" *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
-          {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-          <img [ngClass]="group.largePreview ? 'large-img': 'small-img'"
-            [src]="item.mediaItem.contentUrl" /><br />
-          <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
-            {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
-          <div>
-            {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+          <div class="file p-3 mb-2"
+            *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
+            {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
+            <img [ngClass]="group.largePreview ? 'large-img': 'small-img'" [src]="item.mediaItem.contentUrl" /><br />
+            <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
+              {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
+            <div>
+              {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   </div>
@@ -71,18 +74,26 @@
 
   <table class="table table-bordered my-width mx-auto p-3 mb-2">
     <th>Group</th>
-    <th>Files</th>
-    <th>Uploaded</th>
     <th>Days</th>
     <th>Album</th>
+    <th>Files</th>
+    <th>Uploaded</th>
+    <th>Not uploaded</th>
     <tr *ngFor="let group of mediaItemsGroups">
-      <td>
-        {{ group.name }}
-      </td>
-      <td>{{ group.getCountWithoutDuplicates() }}</td>
-      <td>{{ group.getUploadedCount() }}</td>
+      <td>{{ group.name }}</td>
       <td>{{ getDaysDiffFromToday(group.startTime) }}</td>
       <td>{{ group.albumId ? 'CREATED' : 'not created' }}</td>
+      <td>{{ group.getCountWithoutDuplicates() }}</td>
+      <td>{{ group.getUploadedCount() }}</td>
+      <td>{{ group.getCountWithoutDuplicates() - group.getUploadedCount() }}</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td></td>
+      <td></td>
+      <td>{{ getUniqueMediaItemsCount() }}</td>
+      <td>{{ getUploadedCount() }}</td>
+      <td>{{ getUniqueMediaItemsCount() - getUploadedCount() }}</td>
     </tr>
   </table>
 
@@ -91,7 +102,8 @@
   <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
     <div class="card-body">
       <p class="card-text">
-        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums and upload files</button>
+        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums
+          and upload files</button>
       </p>
       <p class="card-text text-danger" *ngIf="!accessToken">
         Please enter access token
@@ -112,7 +124,8 @@
   <div class="card-body">
     <p class="card-text">
       1) Open
-      <a href="https://developers.google.com/oauthplayground/#step1&scopes=https%3A//www.googleapis.com/auth/photoslibrary.appendonly" target="_blank">OAuth 2.0 Playground</a>
+      <a href="https://developers.google.com/oauthplayground/#step1&scopes=https%3A//www.googleapis.com/auth/photoslibrary.appendonly"
+        target="_blank">OAuth 2.0 Playground</a>
     </p>
     <h6 class="card-subtitle mb-2 text-muted">On OAuth 2.0 Playground page</h6>
     <p class="card-text">

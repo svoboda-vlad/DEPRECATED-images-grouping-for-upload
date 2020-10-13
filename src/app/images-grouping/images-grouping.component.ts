@@ -271,6 +271,14 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
+  getUploadedCount(): number {
+    let uploadedCount = 0;
+    this.mediaItemsGroups.forEach((group) => {
+      uploadedCount += group.getUploadedCount();
+    })
+    return uploadedCount;
+  }
+
 }
 
 export interface IMediaItemsGroup {

@@ -292,4 +292,18 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsGroups[0].showOnlyDuplicates).toEqual(true);
   });
 
+  it('should return correct uploaded items count', () => {
+    component.mediaItemsGroups = [];
+    const mediaItem1 = new MediaItem('name A', moment(),'123','321');
+    const mediaItem2 = new MediaItem('name B',moment(),'456','654');
+    mediaItem2.uploadSuccess = true;
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(),moment(),[
+        new MediaItemForGrouping(mediaItem1,1,0,YesNo.N),
+        new MediaItemForGrouping(mediaItem2,2,0,YesNo.Y)
+      ],'group name')
+    );
+    expect(component.getUploadedCount()).toEqual(1);
+  });
+
 });
