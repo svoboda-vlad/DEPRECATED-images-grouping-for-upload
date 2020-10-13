@@ -216,10 +216,14 @@ export class ImagesGroupingComponent implements OnInit {
 
   createAlbumsAndMedia(): void {
     this.mediaItemsGroups.forEach((group) => {
-      this.albumService.albums(group, this.accessToken).subscribe((album) => {
-        group.albumId = album.id;
+      if (group.albumId == null) {
+        this.albumService.albums(group, this.accessToken).subscribe((album) => {
+          group.albumId = album.id;
+          this.createMedia(group);
+        });
+      } else {
         this.createMedia(group);
-      });
+      }
     });
   }
 
@@ -227,7 +231,7 @@ export class ImagesGroupingComponent implements OnInit {
   createMedia(group: IMediaItemsGroup): void {
     // converted to async/await promises to ensure sequential upload
       group.mediaItemsForGrouping.forEach((item) => {
-        if (item.isDuplicate === YesNo.N) {
+        if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
           this.mediaItemService.uploads(item.mediaItem, this.accessToken).then((uploadToken) => {
             this.callCreateBatch(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
           });
@@ -269,6 +273,14 @@ export class ImagesGroupingComponent implements OnInit {
         group.showOnlyDuplicates = !group.showOnlyDuplicates;
       }
     });
+  }
+
+  getUploadedCount(): number {
+    let uploadedCount = 0;
+    this.mediaItemsGroups.forEach((group) => {
+      uploadedCount += group.getUploadedCount();
+    })
+    return uploadedCount;
   }
 
 }
