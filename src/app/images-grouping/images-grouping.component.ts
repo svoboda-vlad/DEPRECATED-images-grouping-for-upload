@@ -6,6 +6,7 @@ import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
 import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -233,15 +234,11 @@ export class ImagesGroupingComponent implements OnInit {
     // converted to async/await promises to ensure sequential upload
       group.mediaItemsForGrouping.forEach((item) => {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
-          this.mediaItemService.uploads(item.mediaItem, this.accessToken).subscribe((uploadToken) => {
-            this.callCreateBatch(item.mediaItem, uploadToken, group.albumId).subscribe(() => item.mediaItem.uploadSuccess = true);
-          });
+          this.mediaItemService.uploads(item.mediaItem, this.accessToken).pipe(
+            switchMap((uploadToken: string) => this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId))
+            ).subscribe(() => item.mediaItem.uploadSuccess = true);
         }
       });
-  }
-
-  callCreateBatch(item: IMediaItem, uploadToken: string, albumId: string): Observable<any> {
-    return this.mediaItemService.batchCreate(item, uploadToken, this.accessToken, albumId);
   }
 
   saveAccessToken(): any {
