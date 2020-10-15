@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { throwError, of, Observable } from 'rxjs';
+import { throwError, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class MediaItemService {
 
   constructor(private http: HttpClient) { }
 
-  async uploads(mediaItem: IMediaItem, accessToken: string): Promise<string> {
+  uploads(mediaItem: IMediaItem, accessToken: string): Observable<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,10 +24,10 @@ export class MediaItemService {
       observe: "body" as const,
       responseType: "text" as const
     };
-    return await this.http.post(this.uploadsUrl, mediaItem.contentBytes, httpOptions).toPromise();
+    return this.http.post(this.uploadsUrl, mediaItem.contentBytes, httpOptions);
   }
 
-  async batchCreate(mediaItem: IMediaItem, uploadToken: string, accessToken: string, albumId?: string): Promise<any> {
+  batchCreate(mediaItem: IMediaItem, uploadToken: string, accessToken: string, albumId?: string): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -48,7 +48,7 @@ export class MediaItemService {
       ]
     }
 
-    return await this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(error => this.handleError(error))).toPromise();
+    return this.http.post(this.batchCreateUrl, body, httpOptions).pipe(catchError(error => this.handleError(error)));
   }
 
   /** Error handler */

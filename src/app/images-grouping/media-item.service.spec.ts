@@ -33,7 +33,7 @@ describe('MediaService', () => {
 
   it('should return an upload token', () => {
     // 1) should return an upload token
-    service.uploads(item, accessToken).then(
+    service.uploads(item, accessToken).subscribe(
       data => expect(data).toEqual(uploadToken),
       fail
     );
@@ -67,7 +67,7 @@ describe('MediaService', () => {
     }
 
     // 1) should return media item
-    service.batchCreate(item, uploadToken, accessToken, albumId).then(
+    service.batchCreate(item, uploadToken, accessToken, albumId).subscribe(
       data => expect(data).toEqual(item),
       fail
     );
@@ -89,7 +89,7 @@ describe('MediaService', () => {
   it('should return null when HTTP request fails', () => {
     const emsg = 'deliberate 404 error';
     // 1) should return null (not an error)
-    service.batchCreate(item, uploadToken, accessToken, albumId).then(
+    service.batchCreate(item, uploadToken, accessToken, albumId).subscribe(
       data => fail('should have failed with the 404 error'),
       (error: HttpErrorResponse) => {
         expect(error.status).toEqual(404, 'status');

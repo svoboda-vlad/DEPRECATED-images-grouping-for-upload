@@ -28,8 +28,8 @@ describe('ImagesGroupingComponent', () => {
     resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
     uploadToken = 'ABC';
     const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken).toPromise());
-    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of().toPromise());
+    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
+    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of());
     const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('')));
 
@@ -208,7 +208,7 @@ describe('ImagesGroupingComponent', () => {
       ],'group name')
     );
     component.accessToken = '123';
-    component.callCreateBatch(component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem,uploadToken, '').then(() => {
+    component.callCreateBatch(component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem,uploadToken, '').subscribe(() => {
       expect(batchCreateSpy.calls.count()).toEqual(1);
       expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, '']);
     });
