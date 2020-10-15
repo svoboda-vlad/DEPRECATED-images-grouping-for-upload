@@ -12,7 +12,7 @@ export class AlbumService {
 
   constructor(private http: HttpClient) { }
 
-  albums(group: IMediaItemsGroup, accessToken: string): Observable<IAlbum> {
+  async albums(group: IMediaItemsGroup, accessToken: string): Promise<IAlbum> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,10 +24,10 @@ export class AlbumService {
       "album": album
     }
 
-    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
+    return await this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
     .pipe(
       catchError(this.handleError<IAlbum>('albums', null))
-      );
+      ).toPromise();
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

@@ -19,7 +19,7 @@ describe('AlbumService', () => {
       imports: [ HttpClientTestingModule ]
     });
     service = TestBed.inject(AlbumService);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
 
     accessToken = '12345';
     item = new MediaItem('item', moment(), '', '');
@@ -35,7 +35,7 @@ describe('AlbumService', () => {
     const album: IAlbum = new Album('group');
 
     // 1) should return album
-    service.albums(group, accessToken).subscribe(
+    service.albums(group, accessToken).then(
       data => expect(data).toEqual(album),
       fail
     );
@@ -56,7 +56,7 @@ describe('AlbumService', () => {
 
   it('should return null when HTTP request fails', () => {
     // 1) should return null (not an error)
-    service.albums(group, accessToken).subscribe(
+    service.albums(group, accessToken).then(
       data => expect(data).toEqual(null),
       fail
     );

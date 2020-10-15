@@ -28,8 +28,8 @@ describe('ImagesGroupingComponent', () => {
     resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
     uploadToken = 'ABC';
     const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
-    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of());
+    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken).toPromise());
+    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of().toPromise());
     const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('')));
 
