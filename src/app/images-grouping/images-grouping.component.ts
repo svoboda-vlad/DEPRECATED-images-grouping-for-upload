@@ -5,6 +5,7 @@ import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-
 import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -214,33 +215,29 @@ export class ImagesGroupingComponent implements OnInit {
     .replace("Sunday","neděle");
   }
 
-  createAlbumsAndMedia(): void {
-    this.mediaItemsGroups.forEach((group) => {
+  async createAlbumsAndMedia(): Promise<void> {
+    for (let i = 0; i < this.mediaItemsGroups.length; i++) {
+      const group = this.mediaItemsGroups[i];
       if (group.albumId == null) {
-        this.albumService.albums(group, this.accessToken).subscribe((album) => {
+        await this.albumService.albums(group, this.accessToken).then(async (album) => {
           group.albumId = album.id;
-          this.createMedia(group);
+          await this.createMedia(group);
         });
       } else {
-        this.createMedia(group);
+        await this.createMedia(group);
       }
-    });
+    }
   }
 
-
-  createMedia(group: IMediaItemsGroup): void {
-    // converted to async/await promises to ensure sequential upload
-      group.mediaItemsForGrouping.forEach((item) => {
+  async createMedia(group: IMediaItemsGroup): Promise<void> {
+    for (let i = 0; i < group.mediaItemsForGrouping.length; i++) {
+      const item = group.mediaItemsForGrouping[i];
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
-          this.mediaItemService.uploads(item.mediaItem, this.accessToken).then((uploadToken) => {
-            this.callCreateBatch(item.mediaItem, uploadToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
+          await this.mediaItemService.uploads(item.mediaItem, this.accessToken).then(async (uploadToken: string) => {
+            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
           });
         }
-      });
-  }
-
-  callCreateBatch(item: IMediaItem, uploadToken: string, albumId: string): Promise<any> {
-    return this.mediaItemService.batchCreate(item, uploadToken, this.accessToken, albumId);
+      }
   }
 
   saveAccessToken(): any {
