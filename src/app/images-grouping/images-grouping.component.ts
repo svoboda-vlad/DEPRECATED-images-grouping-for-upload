@@ -231,7 +231,6 @@ export class ImagesGroupingComponent implements OnInit {
 
 
   createMedia(group: IMediaItemsGroup): void {
-    // converted to async/await promises to ensure sequential upload
       group.mediaItemsForGrouping.forEach((item) => {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
           this.mediaItemService.uploads(item.mediaItem, this.accessToken).pipe(
