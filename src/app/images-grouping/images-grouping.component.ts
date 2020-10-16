@@ -217,10 +217,11 @@ export class ImagesGroupingComponent implements OnInit {
     .replace("Sunday","neděle");
   }
 
+  // async/await + for...of loop to ensure sequential API calls
+  // not working with arrays' forEach() method
   async createAlbumsAndMedia(): Promise<void> {
     this.uploadingStatus = UploadingStatus.InProgress;
-    for (let i = 0; i < this.mediaItemsGroups.length; i++) {
-      const group = this.mediaItemsGroups[i];
+    for (const group of this.mediaItemsGroups) {
       if (group.albumId == null) {
         await this.albumService.albums(group, this.accessToken).then(async (album) => {
           group.albumId = album.id;
@@ -235,8 +236,7 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   async createMedia(group: IMediaItemsGroup): Promise<void> {
-    for (let i = 0; i < group.mediaItemsForGrouping.length; i++) {
-      const item = group.mediaItemsForGrouping[i];
+    for (const item of group.mediaItemsForGrouping) {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
           await this.mediaItemService.uploads(item.mediaItem, this.accessToken).then(async (uploadToken: string) => {
             await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
