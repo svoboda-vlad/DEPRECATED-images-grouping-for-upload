@@ -225,12 +225,13 @@ export class ImagesGroupingComponent implements OnInit {
         await this.albumService.albums(group, this.accessToken).then(async (album) => {
           group.albumId = album.id;
           await this.createMedia(group);
-        });
+        })
+        .catch(() => this.uploadingStatus = UploadingStatus.Fail);
       } else {
         await this.createMedia(group);
       }
     }
-    this.uploadingStatus = UploadingStatus.Finished;
+    this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }
 
   async createMedia(group: IMediaItemsGroup): Promise<void> {
@@ -335,5 +336,6 @@ export class MediaItemsGroup implements IMediaItemsGroup {
 export enum UploadingStatus {
   None = 'None',
   InProgress = 'InProgress',
-  Finished = 'Finished'
+  Success = 'Success',
+  Fail = 'Fail'
 }

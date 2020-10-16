@@ -107,15 +107,10 @@
         <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums
           and upload files to Google Photos</button>
       </p>
-      <p class="card-text text-danger" *ngIf="!accessToken">
-        Please enter access token
-      </p>
-      <p class="card-text text-danger" *ngIf="uploadingStatus == 'InProgress'">
-        UPLOADING IN PROGRESS
-      </p>
-      <p class="card-text text-primary" *ngIf="uploadingStatus == 'Finished'">
-        UPLOADING FINISHED
-      </p>
+      <p class="card-text text-danger" *ngIf="!accessToken">Please enter access token</p>
+      <p class="card-text text-danger" *ngIf="uploadingStatus == 'InProgress'">UPLOADING IN PROGRESS</p>
+      <p class="card-text text-primary" *ngIf="uploadingStatus == 'Success'">UPLOADING SUCCESSFULLY FINISHED</p>
+      <p class="card-text text-danger" *ngIf="uploadingStatus == 'Fail'">UPLOADING FAILED (see the Groups Overview table for details)</p>
     </div>
   </div>
 </div>
