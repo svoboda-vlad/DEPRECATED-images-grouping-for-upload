@@ -43,7 +43,9 @@
           <button (click)="changeLargePreview(group)"
             class="btn btn-secondary mb-2">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
           <button (click)="changeShowOnlyDuplicates(group)"
-            class="btn btn-secondary mb-2">{{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show only duplicates' }}</button>
+            class="btn btn-secondary mb-2" *ngIf="(group.mediaItemsForGrouping.length - group.getCountWithoutDuplicates()) > 0">
+            {{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show ' + (group.mediaItemsForGrouping.length - group.getCountWithoutDuplicates()) + ' duplicates' }}
+          </button>
         </div>
         <h5 #groupName contenteditable (blur)="updateGroupName(group, groupName.textContent)">{{ group.name }}</h5>
         <div>{{ group.getCountWithoutDuplicates() }} unique files (of {{ group.mediaItemsForGrouping.length }})</div>
@@ -103,10 +105,16 @@
     <div class="card-body">
       <p class="card-text">
         <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums
-          and upload files</button>
+          and upload files to Google Photos</button>
       </p>
       <p class="card-text text-danger" *ngIf="!accessToken">
         Please enter access token
+      </p>
+      <p class="card-text text-danger" *ngIf="uploadingStatus == 'InProgress'">
+        UPLOADING IN PROGRESS
+      </p>
+      <p class="card-text text-primary" *ngIf="uploadingStatus == 'Finished'">
+        UPLOADING FINISHED
       </p>
     </div>
   </div>
