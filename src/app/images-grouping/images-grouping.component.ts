@@ -30,6 +30,7 @@ export class ImagesGroupingComponent implements OnInit {
   filesLoaded: boolean = false;
   filesCount: number;
   groupsCreated: boolean = false;
+  uploadingStatus: UploadingStatus = UploadingStatus.None;
 
   picaOptions: NgxPicaResizeOptionsInterface = {
     exifOptions: {
@@ -64,6 +65,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.mediaItemsGroups = [];
     this.filesLoaded = false;
     this.groupsCreated = false;
+    this.uploadingStatus = UploadingStatus.None;
   }
 
   getMediaItems(fileList): void {
@@ -216,17 +218,20 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   async createAlbumsAndMedia(): Promise<void> {
+    this.uploadingStatus = UploadingStatus.InProgress;
     for (let i = 0; i < this.mediaItemsGroups.length; i++) {
       const group = this.mediaItemsGroups[i];
       if (group.albumId == null) {
         await this.albumService.albums(group, this.accessToken).then(async (album) => {
           group.albumId = album.id;
           await this.createMedia(group);
-        });
+        })
+        .catch(() => this.uploadingStatus = UploadingStatus.Fail);
       } else {
         await this.createMedia(group);
       }
     }
+    this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }
 
   async createMedia(group: IMediaItemsGroup): Promise<void> {
@@ -326,4 +331,11 @@ export class MediaItemsGroup implements IMediaItemsGroup {
   getUploadedCount() : number {
     return this.mediaItemsForGrouping.filter((item) => item.mediaItem.uploadSuccess).length;
   }
+}
+
+export enum UploadingStatus {
+  None = 'None',
+  InProgress = 'InProgress',
+  Success = 'Success',
+  Fail = 'Fail'
 }

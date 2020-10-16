@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import * as moment from 'moment';
 
-import { ImagesGroupingComponent, MediaItemsGroup } from './images-grouping.component';
+import { ImagesGroupingComponent, MediaItemsGroup, UploadingStatus } from './images-grouping.component';
 import { of } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -212,9 +212,11 @@ describe('ImagesGroupingComponent', () => {
     group2.albumId = albumId;
     component.mediaItemsGroups.push(group1, group2);
     component.accessToken = '123';
+    expect(component.uploadingStatus).toEqual(UploadingStatus.None);
     component.createAlbumsAndMedia();
     expect(albumsSpy.calls.count()).toEqual(1);
     expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+    expect(component.uploadingStatus).toEqual(UploadingStatus.InProgress);
   });
 
   it('should save access token', () => {
