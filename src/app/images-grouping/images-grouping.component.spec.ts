@@ -28,10 +28,10 @@ describe('ImagesGroupingComponent', () => {
     resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
     uploadToken = 'ABC';
     const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken).toPromise());
-    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of().toPromise());
+    uploadsSpy = mediaServiceSpy.uploads.and.resolveTo(uploadToken);
+    batchCreateSpy = mediaServiceSpy.batchCreate.and.resolveTo('');
     const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
-    albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('')));
+    albumsSpy = albumServiceSpy.albums.and.resolveTo(new Album(''));
 
     TestBed.configureTestingModule({
       declarations: [ ImagesGroupingComponent ],
@@ -212,11 +212,11 @@ describe('ImagesGroupingComponent', () => {
     group2.albumId = albumId;
     component.mediaItemsGroups.push(group1, group2);
     component.accessToken = '123';
-    expect(component.uploadingStatus).toEqual(UploadingStatus.None);
-    component.createAlbumsAndMedia();
-    expect(albumsSpy.calls.count()).toEqual(1);
-    expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
-    expect(component.uploadingStatus).toEqual(UploadingStatus.InProgress);
+    component.createAlbumsAndMedia().then(() => {
+      expect(albumsSpy.calls.count()).toEqual(1);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(component.uploadingStatus).toEqual(UploadingStatus.Success);
+    });
   });
 
   it('should save access token', () => {
