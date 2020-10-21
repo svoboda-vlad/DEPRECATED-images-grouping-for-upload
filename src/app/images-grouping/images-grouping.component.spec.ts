@@ -186,28 +186,17 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.Y);
   });
 
-  it('should call uploads api', () => {
+  it('should call albums api', () => {
+    component.mediaItemsGroups = [];
     const item1 = new MediaItem('name A', moment(),'123','321');
     item1.uploadSuccess = true;
     const item2 = new MediaItem('name B', moment(),'456','654');
-    const group = new MediaItemsGroup(1, moment(),moment(), [
-        new MediaItemForGrouping(item1,1,0,YesNo.N),
-        new MediaItemForGrouping(item2,2,0,YesNo.N)
-      ],'group name');
-    component.accessToken = '123';
-    component.createMedia(group);
-    expect(uploadsSpy.calls.count()).toEqual(1);
-    expect(uploadsSpy.calls.argsFor(0)).toEqual([group.mediaItemsForGrouping[1].mediaItem, component.accessToken]);
-  });
-
-  it('should call albums api', () => {
-    component.mediaItemsGroups = [];
     const albumId = 'album 123';
     const group1 = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      new MediaItemForGrouping(item1,1,0,YesNo.N)
     ],'group name');
     const group2 = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
+      new MediaItemForGrouping(item2,1,0,YesNo.N)
     ],'group name');
     group2.albumId = albumId;
     component.mediaItemsGroups.push(group1, group2);
@@ -216,6 +205,10 @@ describe('ImagesGroupingComponent', () => {
       expect(albumsSpy.calls.count()).toEqual(1);
       expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Success);
+      expect(uploadsSpy.calls.count()).toEqual(1);
+      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+      expect(batchCreateSpy.calls.count()).toEqual(1);
+      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, component.mediaItemsGroups[1].albumId]);
     });
   });
 
