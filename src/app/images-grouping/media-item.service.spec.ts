@@ -86,9 +86,9 @@ describe('MediaService', () => {
     httpMock.verify();
   });
 
-  it('should return null when HTTP request fails', () => {
+  it('should return error when HTTP request fails', () => {
     const emsg = 'deliberate 404 error';
-    // 1) should return null (not an error)
+    // 1) should return error
     service.batchCreate(item, uploadToken, accessToken, albumId).then(
       data => fail('should have failed with the 404 error'),
       (error: HttpErrorResponse) => {
