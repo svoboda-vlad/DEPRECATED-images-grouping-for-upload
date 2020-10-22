@@ -5,6 +5,7 @@ import * as moment from 'moment';
 import { AlbumService, IAlbum, Album } from './album.service';
 import { IMediaItemsGroup, MediaItemsGroup } from './images-grouping.component';
 import { MediaItemForGrouping, MediaItem, IMediaItem, IMediaItemForGrouping, YesNo } from './media-item.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('AlbumService', () => {
   let service: AlbumService;
@@ -54,16 +55,20 @@ describe('AlbumService', () => {
     httpMock.verify();
   });
 
-  it('should return null when HTTP request fails', () => {
-    // 1) should return null (not an error)
+  it('should return error when HTTP request fails', () => {
+    const emsg = 'deliberate 404 error';
+    // 1) should return an error
     service.albums(group, accessToken).then(
-      data => expect(data).toEqual(null),
-      fail
+      data => fail('should have failed with the 404 error'),
+      (error: HttpErrorResponse) => {
+        expect(error.status).toEqual(404, 'status');
+        expect(error.error).toEqual(emsg, 'message');
+      }
     );
     // 2) should call api once
     const req = httpMock.expectOne(service.albumsUrl);
     // mocked HTTP response
-    req.flush('deliberate 404 error', { status: 404, statusText: 'Not Found' });
+    req.flush(emsg, { status: 404, statusText: 'Not Found' });
     // should not be any outstanding requests
     httpMock.verify();
   });

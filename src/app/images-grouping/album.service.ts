@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
-import { Observable, of } from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -25,16 +25,21 @@ export class AlbumService {
     }
 
     return await this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
-    .pipe(
-      catchError(this.handleError<IAlbum>('albums', null))
-      ).toPromise();
+    .pipe(catchError(error => this.handleError(error))).toPromise();
   }
 
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
-    };
+  /** Error handler */
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      // A client-side error.
+      console.error('An client-side error occurred:', error.error.message);
+    } else {
+      // The backend error.
+      console.error('An backend error occurred:', error.error.message);
+      return throwError(error);
+    }
+    // return a custom error message
+    return throwError('Something bad happened; please try again later.');
   }
 
 }
