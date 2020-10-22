@@ -55,10 +55,10 @@ export class MediaItemService {
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
       // A client-side error.
-      console.error('An error occurred:', error.error.message);
+      console.error('An client-side error occurred:', error.error.message);
     } else {
       // The backend error.
-      console.error('An error occurred:', error.error.message);
+      console.error('An backend error occurred:', error.error.message);
       return throwError(error);
     }
     // return a custom error message
