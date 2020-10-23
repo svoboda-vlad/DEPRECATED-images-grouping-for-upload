@@ -238,8 +238,10 @@ export class ImagesGroupingComponent implements OnInit {
     for (const item of group.mediaItemsForGrouping) {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
           await this.mediaItemService.uploads(item.mediaItem, this.accessToken).then(async (uploadToken: string) => {
-            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
-          });
+            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true)
+            .catch(() => this.uploadingStatus = UploadingStatus.Fail);
+          })
+          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
         }
       }
   }

@@ -43,7 +43,7 @@
           <button (click)="changeLargePreview(group)"
             class="btn btn-secondary mb-2">{{ group.largePreview ? 'Small preview' : 'Large preview' }}</button>
           <button (click)="changeShowOnlyDuplicates(group)"
-            class="btn btn-secondary mb-2" *ngIf="(group.mediaItemsForGrouping.length - group.getCountWithoutDuplicates()) > 0">
+            class="btn btn-secondary mb-2" *ngIf="(group.mediaItemsForGrouping.length - group.getCountWithoutDuplicates()) > 0 || group.showOnlyDuplicates">
             {{ group.showOnlyDuplicates ? 'Hide duplicates' : 'Show ' + (group.mediaItemsForGrouping.length - group.getCountWithoutDuplicates()) + ' duplicates' }}
           </button>
         </div>
