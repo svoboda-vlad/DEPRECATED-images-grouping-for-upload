@@ -221,15 +221,17 @@ export class ImagesGroupingComponent implements OnInit {
   async createAlbumsAndMedia(): Promise<void> {
     this.uploadingStatus = UploadingStatus.InProgress;
     for (const group of this.mediaItemsGroups) {
-      if (group.albumId == null) {
-        await this.albumService.albums(group, this.accessToken).toPromise().then(async (album) => {
-          group.albumId = album.id;
+        if (group.albumId == null) {
+          await this.albumService.albums(group, this.accessToken).toPromise().then(async (album) => {
+            group.albumId = album.id;
+            await this.createMedia(group);
+          })
+          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
+        } else {
           await this.createMedia(group);
-        })
-        .catch(() => this.uploadingStatus = UploadingStatus.Fail);
-      } else {
-        await this.createMedia(group);
-      }
+        }
+        // when API call error, then brak the loop
+        if (this.uploadingStatus != UploadingStatus.InProgress) break;
     }
     this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }

@@ -3,7 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import * as moment from 'moment';
 
 import { ImagesGroupingComponent, MediaItemsGroup, UploadingStatus } from './images-grouping.component';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService, IMediaItem } from './media-item.service';
@@ -15,9 +15,9 @@ describe('ImagesGroupingComponent', () => {
   let resizeImagesSpy: jasmine.Spy;
   let file: File;
   let uploadToken: string;
-  let uploadsSpy: jasmine.Spy;
-  let batchCreateSpy: jasmine.Spy;
-  let albumsSpy: jasmine.Spy;
+  let picaServiceSpy: jasmine.SpyObj<any>;
+  let mediaServiceSpy: jasmine.SpyObj<any>;
+  let albumServiceSpy: jasmine.SpyObj<any>;
   let returnedAlbumId: string;
 
   beforeEach(async(() => {
@@ -25,15 +25,12 @@ describe('ImagesGroupingComponent', () => {
     blob['lastModifiedDate'] = '';
     blob['name'] = 'filename';
     file = <File>blob;
-    const picaServiceSpy = jasmine.createSpyObj('NgxPicaService', ['resizeImages']);
+    picaServiceSpy = jasmine.createSpyObj('NgxPicaService', ['resizeImages']);
     resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
     uploadToken = 'ABC';
-    const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
-    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
-    const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
-    returnedAlbumId = 'abc'
-    albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('','', returnedAlbumId)));
+    mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
+    albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
+    returnedAlbumId = 'abc';
 
     TestBed.configureTestingModule({
       declarations: [ ImagesGroupingComponent ],
@@ -188,7 +185,7 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.Y);
   });
 
-  it('should call APIs - albums, uploads, batchCreate and update uploading status and album id', () => {
+  it('should call APIs - albums, uploads, batchCreate - with success and update uploading status and album id', () => {
     component.mediaItemsGroups = [];
     const item1 = new MediaItem('name A', moment(),'123','321');
     item1.uploadSuccess = true;
@@ -203,6 +200,9 @@ describe('ImagesGroupingComponent', () => {
     group2.albumId = albumId;
     component.mediaItemsGroups.push(group1, group2);
     component.accessToken = '123';
+    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('','', returnedAlbumId)));
+    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
+    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
       expect(albumsSpy.calls.count()).toEqual(1);
       expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
@@ -212,6 +212,35 @@ describe('ImagesGroupingComponent', () => {
       expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
       expect(batchCreateSpy.calls.count()).toEqual(1);
       expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, component.mediaItemsGroups[1].albumId]);
+    });
+  });
+
+
+  it('should call album API with error, not call uploads and batchCreate APIs and update uploading status', () => {
+    component.mediaItemsGroups = [];
+    const item1 = new MediaItem('name A', moment(),'123','321');
+    item1.uploadSuccess = true;
+    const item2 = new MediaItem('name B', moment(),'456','654');
+    const albumId = 'album 123';
+    const group1 = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(item1,1,0,YesNo.N)
+    ],'group name');
+    const group2 = new MediaItemsGroup(1, moment(),moment(),[
+      new MediaItemForGrouping(item2,1,0,YesNo.N)
+    ],'group name');
+    group2.albumId = albumId;
+    component.mediaItemsGroups.push(group1, group2);
+    component.accessToken = '123';
+    const albumsSpy = albumServiceSpy.albums.and.returnValue(throwError('error'));
+    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
+    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
+    component.createAlbumsAndMedia().then(() => {
+      expect(albumsSpy.calls.count()).toEqual(1);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
+      expect(component.mediaItemsGroups[0].albumId).toBeUndefined();
+      expect(uploadsSpy.calls.count()).toEqual(0);
+      expect(batchCreateSpy.calls.count()).toEqual(0);
     });
   });
 
