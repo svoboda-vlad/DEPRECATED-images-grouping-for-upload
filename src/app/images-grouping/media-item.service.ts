@@ -24,7 +24,7 @@ export class MediaItemService {
       observe: "body" as const,
       responseType: "text" as const
     };
-    return await this.http.post(this.uploadsUrl, mediaItem.contentBytes, httpOptions).toPromise();
+    return await this.http.post(this.uploadsUrl, mediaItem.contentBytes, httpOptions).pipe(catchError(error => this.handleError(error))).toPromise();
   }
 
   async batchCreate(mediaItem: IMediaItem, uploadToken: string, accessToken: string, albumId?: string): Promise<any> {
