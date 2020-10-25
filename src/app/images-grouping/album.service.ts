@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class AlbumService {
 
   constructor(private http: HttpClient) { }
 
-  async albums(group: IMediaItemsGroup, accessToken: string): Promise<IAlbum> {
+  albums(group: IMediaItemsGroup, accessToken: string): Observable<IAlbum> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,22 +24,23 @@ export class AlbumService {
       "album": album
     }
 
-    return await this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
-    .pipe(catchError(error => this.handleError(error))).toPromise();
+    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
+    .pipe(catchError(error => this.handleError(error)));
   }
 
-  /** Error handler */
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      // A client-side error.
-      console.error('An client-side error occurred:', error.error.message);
+      // A client-side or network error occurred. Handle it accordingly.
+      console.error('An error occurred:', error.error.message);
     } else {
-      // The backend error.
-      console.error('An backend error occurred:', error.error.message);
-      return throwError(error);
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong.
+      console.error(
+        `Backend returned code ${error.status}, ` +
+        `body was: ${error.error}`);
     }
-    // return a custom error message
-    return throwError('Something bad happened; please try again later.');
+    // Return an observable with a user-facing error message.
+    return throwError(error);
   }
 
 }

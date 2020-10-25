@@ -221,15 +221,17 @@ export class ImagesGroupingComponent implements OnInit {
   async createAlbumsAndMedia(): Promise<void> {
     this.uploadingStatus = UploadingStatus.InProgress;
     for (const group of this.mediaItemsGroups) {
-      if (group.albumId == null) {
-        await this.albumService.albums(group, this.accessToken).then(async (album) => {
-          group.albumId = album.id;
+        if (group.albumId == null) {
+          await this.albumService.albums(group, this.accessToken).toPromise().then(async (album) => {
+            group.albumId = album.id;
+            await this.createMedia(group);
+          })
+          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
+        } else {
           await this.createMedia(group);
-        })
-        .catch(() => this.uploadingStatus = UploadingStatus.Fail);
-      } else {
-        await this.createMedia(group);
-      }
+        }
+        // when API call error, then brak the loop
+        if (this.uploadingStatus != UploadingStatus.InProgress) break;
     }
     this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }
@@ -237,9 +239,11 @@ export class ImagesGroupingComponent implements OnInit {
   async createMedia(group: IMediaItemsGroup): Promise<void> {
     for (const item of group.mediaItemsForGrouping) {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
-          await this.mediaItemService.uploads(item.mediaItem, this.accessToken).then(async (uploadToken: string) => {
-            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).then(() => item.mediaItem.uploadSuccess = true);
-          });
+          await this.mediaItemService.uploads(item.mediaItem, this.accessToken).toPromise().then(async (uploadToken: string) => {
+            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
+            .catch(() => this.uploadingStatus = UploadingStatus.Fail);
+          })
+          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
         }
       }
   }
