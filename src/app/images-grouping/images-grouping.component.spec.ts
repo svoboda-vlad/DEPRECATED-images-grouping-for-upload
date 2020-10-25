@@ -33,13 +33,13 @@ describe('ImagesGroupingComponent', () => {
     returnedAlbumId = 'abc';
 
     TestBed.configureTestingModule({
-      declarations: [ ImagesGroupingComponent ],
-      imports: [ HttpClientTestingModule, ReactiveFormsModule ],
+      declarations: [ImagesGroupingComponent],
+      imports: [HttpClientTestingModule, ReactiveFormsModule],
       providers: [{ provide: NgxPicaService, useValue: picaServiceSpy },
       { provide: MediaItemService, useValue: mediaServiceSpy },
       { provide: AlbumService, useValue: albumServiceSpy }]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
@@ -83,12 +83,12 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItems[0].name).toEqual(file.name);
   });
 
-  it('should create media items for grouping with sequence numbers',() => {
+  it('should create media items for grouping with sequence numbers', () => {
     component.mediaItems = [];
     component.mediaItemsForGrouping = [];
-    const mediaItem1 = new MediaItem('name B',moment(),'123','321');
-    const mediaItem2 = new MediaItem('name A',moment(),'456','654');
-    const mediaItem3 = new MediaItem('name C',moment(),'678','876');
+    const mediaItem1 = new MediaItem('name B', moment(), '123', '321');
+    const mediaItem2 = new MediaItem('name A', moment(), '456', '654');
+    const mediaItem3 = new MediaItem('name C', moment(), '678', '876');
     component.mediaItems.push(mediaItem1);
     component.mediaItems.push(mediaItem2);
     component.mediaItems.push(mediaItem3);
@@ -104,9 +104,9 @@ describe('ImagesGroupingComponent', () => {
     const dateString = '2020-08-19';
     const timeDiffSec = 5;
     const dateTime1 = moment(dateString);
-    const dateTime2 = moment(dateString).add(timeDiffSec,'seconds');
-    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A',dateTime1,'123','321'),1,0);
-    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',dateTime2,'456','654'),2,0);
+    const dateTime2 = moment(dateString).add(timeDiffSec, 'seconds');
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', dateTime1, '123', '321'), 1, 0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B', dateTime2, '456', '654'), 2, 0);
     component.mediaItemsForGrouping.push(mediaItemForGrouping1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping2);
     component.calculateTimeDiff();
@@ -118,9 +118,9 @@ describe('ImagesGroupingComponent', () => {
     component.mediaItemsForGrouping = [];
     const dateString = moment().format('YYYY-MM-DD');
     const dateTime1 = moment(dateString);
-    const dateTime2 = moment(dateString).add(component.timeDiffDuplicate,'seconds');
-    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A',dateTime1,'123','321'),1,0);
-    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',dateTime2,'456','654'),2,0);
+    const dateTime2 = moment(dateString).add(component.timeDiffDuplicate, 'seconds');
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', dateTime1, '123', '321'), 1, 0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B', dateTime2, '456', '654'), 2, 0);
     component.mediaItemsForGrouping.push(mediaItemForGrouping1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping2);
     component.identifyDuplicates();
@@ -130,9 +130,9 @@ describe('ImagesGroupingComponent', () => {
 
   it('should correctly identify groups', () => {
     component.mediaItemsForGrouping = [];
-    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0);
-    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B',moment(),'456','654'),2,component.timeDiffGroup + 1);
-    const mediaItemForGrouping3 = new MediaItemForGrouping(new MediaItem('name C',moment(),'678','876'),3,component.timeDiffGroup - 1);
+    const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0);
+    const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 2, component.timeDiffGroup + 1);
+    const mediaItemForGrouping3 = new MediaItemForGrouping(new MediaItem('name C', moment(), '678', '876'), 3, component.timeDiffGroup - 1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping1);
     component.mediaItemsForGrouping.push(mediaItemForGrouping2);
     component.mediaItemsForGrouping.push(mediaItemForGrouping3);
@@ -148,10 +148,10 @@ describe('ImagesGroupingComponent', () => {
   it('should return correct unique items count', () => {
     component.mediaItemsGroups = [];
     component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N),
-        new MediaItemForGrouping(new MediaItem('name B',moment(),'456','654'),2,0,YesNo.Y)
-      ],'group name')
+      new MediaItemsGroup(1, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N),
+        new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 2, 0, YesNo.Y)
+      ], 'group name')
     );
     expect(component.getUniqueMediaItemsCount()).toEqual(1);
   });
@@ -159,7 +159,7 @@ describe('ImagesGroupingComponent', () => {
   it('should return correct day difference', () => {
     const dateString = moment().format('YYYY-MM-DD');
     const daysDiff = -5;
-    const groupDate = moment(dateString).add(daysDiff,'days');
+    const groupDate = moment(dateString).add(daysDiff, 'days');
     const todayDate = moment(dateString);
     expect(component.getDaysDiffFromToday(groupDate, todayDate)).toEqual(daysDiff);
   });
@@ -168,42 +168,42 @@ describe('ImagesGroupingComponent', () => {
     component.mediaItemsGroups = [];
     const newGroupName = 'name new';
     component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[],'group name')
+      new MediaItemsGroup(1, moment(), moment(), [], 'group name')
     );
-    component.updateGroupName(component.mediaItemsGroups[0],newGroupName);
+    component.updateGroupName(component.mediaItemsGroups[0], newGroupName);
     expect(component.mediaItemsGroups[0].name).toEqual(newGroupName);
   });
 
   it('should change duplicate', () => {
     component.mediaItemsGroups = [];
     component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name')
+      new MediaItemsGroup(1, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+      ], 'group name')
     );
-    component.changeIsDuplicate(component.mediaItemsGroups[0],component.mediaItemsGroups[0].mediaItemsForGrouping[0]);
+    component.changeIsDuplicate(component.mediaItemsGroups[0], component.mediaItemsGroups[0].mediaItemsForGrouping[0]);
     expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.Y);
   });
 
   it('should call APIs - albums, uploads, batchCreate - with success and update uploading status and album id', () => {
     component.mediaItemsGroups = [];
-    const item1 = new MediaItem('name A', moment(),'123','321');
+    const item1 = new MediaItem('name A', moment(), '123', '321');
     item1.uploadSuccess = true;
-    const item2 = new MediaItem('name B', moment(),'456','654');
-    const item3 = new MediaItem('name C', moment(),'789','987');
+    const item2 = new MediaItem('name B', moment(), '456', '654');
+    const item3 = new MediaItem('name C', moment(), '789', '987');
     const albumId = 'album 123';
-    const group1 = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(item1,1,0,YesNo.N)
-    ],'group name1');
-    const group2 = new MediaItemsGroup(2, moment(),moment(),[
-      new MediaItemForGrouping(item2,1,0,YesNo.N)
-    ],'group name2');
+    const group1 = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(item1, 1, 0, YesNo.N)
+    ], 'group name1');
+    const group2 = new MediaItemsGroup(2, moment(), moment(), [
+      new MediaItemForGrouping(item2, 1, 0, YesNo.N)
+    ], 'group name2');
     group2.albumId = albumId;
-    const group3 = new MediaItemsGroup(3, moment(),moment(),[
-      new MediaItemForGrouping(item3,1,0,YesNo.N)
-    ],'group name3');
+    const group3 = new MediaItemsGroup(3, moment(), moment(), [
+      new MediaItemForGrouping(item3, 1, 0, YesNo.N)
+    ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
-    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('','', returnedAlbumId)));
+    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
@@ -221,21 +221,21 @@ describe('ImagesGroupingComponent', () => {
 
   it('should call album API with error, not call uploads and batchCreate APIs and update uploading status', () => {
     component.mediaItemsGroups = [];
-    const item1 = new MediaItem('name A', moment(),'123','321');
+    const item1 = new MediaItem('name A', moment(), '123', '321');
     item1.uploadSuccess = true;
-    const item2 = new MediaItem('name B', moment(),'456','654');
-    const item3 = new MediaItem('name C', moment(),'789','987');
+    const item2 = new MediaItem('name B', moment(), '456', '654');
+    const item3 = new MediaItem('name C', moment(), '789', '987');
     const albumId = 'album 123';
-    const group1 = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(item1,1,0,YesNo.N)
-    ],'group name1');
-    const group2 = new MediaItemsGroup(2, moment(),moment(),[
-      new MediaItemForGrouping(item2,1,0,YesNo.N)
-    ],'group name2');
+    const group1 = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(item1, 1, 0, YesNo.N)
+    ], 'group name1');
+    const group2 = new MediaItemsGroup(2, moment(), moment(), [
+      new MediaItemForGrouping(item2, 1, 0, YesNo.N)
+    ], 'group name2');
     group2.albumId = albumId;
-    const group3 = new MediaItemsGroup(3, moment(),moment(),[
-      new MediaItemForGrouping(item3,1,0,YesNo.N)
-    ],'group name3');
+    const group3 = new MediaItemsGroup(3, moment(), moment(), [
+      new MediaItemForGrouping(item3, 1, 0, YesNo.N)
+    ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
     component.accessToken = '123';
     const albumsSpy = albumServiceSpy.albums.and.returnValue(throwError('error'));
@@ -251,6 +251,40 @@ describe('ImagesGroupingComponent', () => {
     });
   });
 
+
+  it('should call album API, uploads API with error, not call batchCreate API and update uploading status', () => {
+    component.mediaItemsGroups = [];
+    const item1 = new MediaItem('name A', moment(), '123', '321');
+    item1.uploadSuccess = true;
+    const item2 = new MediaItem('name B', moment(), '456', '654');
+    const item3 = new MediaItem('name C', moment(), '789', '987');
+    const albumId = 'album 123';
+    const group1 = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(item1, 1, 0, YesNo.N)
+    ], 'group name1');
+    const group2 = new MediaItemsGroup(2, moment(), moment(), [
+      new MediaItemForGrouping(item2, 1, 0, YesNo.N)
+    ], 'group name2');
+    group2.albumId = albumId;
+    const group3 = new MediaItemsGroup(3, moment(), moment(), [
+      new MediaItemForGrouping(item3, 1, 0, YesNo.N)
+    ], 'group name3');
+    component.mediaItemsGroups.push(group1, group2, group3);
+    component.accessToken = '123';
+    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
+    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(throwError('error'));
+    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
+    component.createAlbumsAndMedia().then(() => {
+      expect(albumsSpy.calls.count()).toEqual(1);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
+      expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
+      expect(uploadsSpy.calls.count()).toEqual(1);
+      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+      expect(batchCreateSpy.calls.count()).toEqual(0);
+    });
+  });
+
   it('should save access token', () => {
     const accessToken = 'abc';
     component.uploadForm.controls['accessToken'].setValue(accessToken);
@@ -260,26 +294,26 @@ describe('ImagesGroupingComponent', () => {
 
   it('should return correct uploaded count', () => {
     const uploadedCount = 2;
-    let mediaItem1: IMediaItem = new MediaItem('name A', moment(),'123','321');
+    let mediaItem1: IMediaItem = new MediaItem('name A', moment(), '123', '321');
     mediaItem1.uploadSuccess = true;
-    let mediaItem2: IMediaItem = new MediaItem('name B', moment(),'456','654');
+    let mediaItem2: IMediaItem = new MediaItem('name B', moment(), '456', '654');
     mediaItem2.uploadSuccess = true;
-    const group = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(mediaItem1,1,0,YesNo.N),
-      new MediaItemForGrouping(mediaItem2,1,0,YesNo.N)
-    ],'group name');
+    const group = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(mediaItem1, 1, 0, YesNo.N),
+      new MediaItemForGrouping(mediaItem2, 1, 0, YesNo.N)
+    ], 'group name');
     expect(group.getUploadedCount()).toEqual(uploadedCount);
   });
 
   it('should remove group', () => {
     component.mediaItemsGroups = [];
     component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-      ],'group name 1'),
-      new MediaItemsGroup(2, moment(),moment(),[
-        new MediaItemForGrouping(new MediaItem('name B', moment(),'456','654'),1,0,YesNo.N)
-      ],'group name 2')
+      new MediaItemsGroup(1, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+      ], 'group name 1'),
+      new MediaItemsGroup(2, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 1, 0, YesNo.N)
+      ], 'group name 2')
     );
     const originalLength = component.mediaItemsGroups.length;
     component.removeGroup(component.mediaItemsGroups[0]);
@@ -288,9 +322,9 @@ describe('ImagesGroupingComponent', () => {
 
   it('should change group show value', () => {
     component.mediaItemsGroups = [];
-    const group = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-    ],'group name');
+    const group = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+    ], 'group name');
     group.show = false;
     component.mediaItemsGroups.push(group);
     component.changeShowGroup(component.mediaItemsGroups[0]);
@@ -299,9 +333,9 @@ describe('ImagesGroupingComponent', () => {
 
   it('should change group large preview value', () => {
     component.mediaItemsGroups = [];
-    const group = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-    ],'group name');
+    const group = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+    ], 'group name');
     group.largePreview = false;
     component.mediaItemsGroups.push(group);
     component.changeLargePreview(component.mediaItemsGroups[0]);
@@ -310,9 +344,9 @@ describe('ImagesGroupingComponent', () => {
 
   it('should change group show only duplicates value', () => {
     component.mediaItemsGroups = [];
-    const group = new MediaItemsGroup(1, moment(),moment(),[
-      new MediaItemForGrouping(new MediaItem('name A', moment(),'123','321'),1,0,YesNo.N)
-    ],'group name');
+    const group = new MediaItemsGroup(1, moment(), moment(), [
+      new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+    ], 'group name');
     group.showOnlyDuplicates = false;
     component.mediaItemsGroups.push(group);
     component.changeShowOnlyDuplicates(component.mediaItemsGroups[0]);
@@ -321,14 +355,14 @@ describe('ImagesGroupingComponent', () => {
 
   it('should return correct uploaded items count', () => {
     component.mediaItemsGroups = [];
-    const mediaItem1 = new MediaItem('name A', moment(),'123','321');
-    const mediaItem2 = new MediaItem('name B',moment(),'456','654');
+    const mediaItem1 = new MediaItem('name A', moment(), '123', '321');
+    const mediaItem2 = new MediaItem('name B', moment(), '456', '654');
     mediaItem2.uploadSuccess = true;
     component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(),moment(),[
-        new MediaItemForGrouping(mediaItem1,1,0,YesNo.N),
-        new MediaItemForGrouping(mediaItem2,2,0,YesNo.Y)
-      ],'group name')
+      new MediaItemsGroup(1, moment(), moment(), [
+        new MediaItemForGrouping(mediaItem1, 1, 0, YesNo.N),
+        new MediaItemForGrouping(mediaItem2, 2, 0, YesNo.Y)
+      ], 'group name')
     );
     expect(component.getUploadedCount()).toEqual(1);
   });
