@@ -29,11 +29,11 @@ describe('ImagesGroupingComponent', () => {
     resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
     uploadToken = 'ABC';
     const mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    uploadsSpy = mediaServiceSpy.uploads.and.resolveTo(uploadToken);
-    batchCreateSpy = mediaServiceSpy.batchCreate.and.resolveTo('');
+    uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
+    batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     const albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     returnedAlbumId = 'abc'
-    albumsSpy = albumServiceSpy.albums.and.resolveTo(new Album('','', returnedAlbumId));
+    albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('','', returnedAlbumId)));
 
     TestBed.configureTestingModule({
       declarations: [ ImagesGroupingComponent ],

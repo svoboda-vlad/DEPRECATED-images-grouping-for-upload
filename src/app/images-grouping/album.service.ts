@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { IMediaItemsGroup } from './images-grouping.component';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class AlbumService {
 
   constructor(private http: HttpClient) { }
 
-  async albums(group: IMediaItemsGroup, accessToken: string): Promise<IAlbum> {
+  albums(group: IMediaItemsGroup, accessToken: string): Observable<IAlbum> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Authorization': 'Bearer ' + accessToken,
@@ -24,8 +24,8 @@ export class AlbumService {
       "album": album
     }
 
-    return await this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
-    .pipe(catchError(error => this.handleError(error))).toPromise();
+    return this.http.post<IAlbum>(this.albumsUrl, body, httpOptions)
+    .pipe(catchError(error => this.handleError(error)));
   }
 
   private handleError(error: HttpErrorResponse) {

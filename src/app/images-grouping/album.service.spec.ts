@@ -36,7 +36,7 @@ describe('AlbumService', () => {
     const album: IAlbum = new Album('group');
 
     // 1) should return album
-    service.albums(group, accessToken).then(
+    service.albums(group, accessToken).subscribe(
       data => expect(data).toEqual(album),
       fail
     );
@@ -58,7 +58,7 @@ describe('AlbumService', () => {
   it('should return error when HTTP request fails', () => {
     const emsg = 'deliberate 404 error';
     // 1) should return an error
-    service.albums(group, accessToken).then(
+    service.albums(group, accessToken).subscribe(
       data => fail('should have failed with the 404 error'),
       (error: HttpErrorResponse) => {
         expect(error.status).toEqual(404, 'status');
