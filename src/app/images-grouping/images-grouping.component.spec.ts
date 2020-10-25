@@ -190,27 +190,30 @@ describe('ImagesGroupingComponent', () => {
     const item1 = new MediaItem('name A', moment(),'123','321');
     item1.uploadSuccess = true;
     const item2 = new MediaItem('name B', moment(),'456','654');
+    const item3 = new MediaItem('name C', moment(),'789','987');
     const albumId = 'album 123';
     const group1 = new MediaItemsGroup(1, moment(),moment(),[
       new MediaItemForGrouping(item1,1,0,YesNo.N)
-    ],'group name');
-    const group2 = new MediaItemsGroup(1, moment(),moment(),[
+    ],'group name1');
+    const group2 = new MediaItemsGroup(2, moment(),moment(),[
       new MediaItemForGrouping(item2,1,0,YesNo.N)
-    ],'group name');
+    ],'group name2');
     group2.albumId = albumId;
-    component.mediaItemsGroups.push(group1, group2);
-    component.accessToken = '123';
+    const group3 = new MediaItemsGroup(3, moment(),moment(),[
+      new MediaItemForGrouping(item3,1,0,YesNo.N)
+    ],'group name3');
+    component.mediaItemsGroups.push(group1, group2, group3);
     const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('','', returnedAlbumId)));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
-      expect(albumsSpy.calls.count()).toEqual(1);
+      expect(albumsSpy.calls.count()).toEqual(2);
       expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Success);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
-      expect(uploadsSpy.calls.count()).toEqual(1);
+      expect(uploadsSpy.calls.count()).toEqual(2);
       expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
-      expect(batchCreateSpy.calls.count()).toEqual(1);
+      expect(batchCreateSpy.calls.count()).toEqual(2);
       expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, component.mediaItemsGroups[1].albumId]);
     });
   });
@@ -221,15 +224,19 @@ describe('ImagesGroupingComponent', () => {
     const item1 = new MediaItem('name A', moment(),'123','321');
     item1.uploadSuccess = true;
     const item2 = new MediaItem('name B', moment(),'456','654');
+    const item3 = new MediaItem('name C', moment(),'789','987');
     const albumId = 'album 123';
     const group1 = new MediaItemsGroup(1, moment(),moment(),[
       new MediaItemForGrouping(item1,1,0,YesNo.N)
-    ],'group name');
-    const group2 = new MediaItemsGroup(1, moment(),moment(),[
+    ],'group name1');
+    const group2 = new MediaItemsGroup(2, moment(),moment(),[
       new MediaItemForGrouping(item2,1,0,YesNo.N)
-    ],'group name');
+    ],'group name2');
     group2.albumId = albumId;
-    component.mediaItemsGroups.push(group1, group2);
+    const group3 = new MediaItemsGroup(3, moment(),moment(),[
+      new MediaItemForGrouping(item3,1,0,YesNo.N)
+    ],'group name3');
+    component.mediaItemsGroups.push(group1, group2, group3);
     component.accessToken = '123';
     const albumsSpy = albumServiceSpy.albums.and.returnValue(throwError('error'));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
