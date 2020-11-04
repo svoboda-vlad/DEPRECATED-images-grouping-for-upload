@@ -1,5 +1,26 @@
 <h2 class="my-width mx-auto">Grouping and resizing images for uploading to Google Photos</h2>
 
+<div *ngIf="!user" class="card text-center">
+  <div class="card-block">
+    <h4 class="card-title">Not signed in</h4>
+    <p class="card-text">Sign in with</p>
+  </div>
+  <div class="card-block">
+    <button class="btn btn-primary mb-2" (click)="signInWithGoogle()">Sign in with Google</button>
+  </div>
+</div>
+
+<div *ngIf="user" class="card text-center">
+  <div class="card-block">
+    <h4 class="card-title">{{ user.name }}</h4>
+    <p class="card-text">{{ user.email }}</p>
+    <p class="card-text">Logged in with {{ user.provider }}</p>
+  </div>
+  <div class="card-block">
+    <button class="btn btn-danger" (click)="signOut()">Sign out</button>
+  </div>
+</div>
+
 <form [formGroup]="inputFilesForm">
   <div class="form-group my-width mx-auto">
     <label for="inputFiles">Select images for grouping</label>
@@ -104,53 +125,12 @@
   <div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
     <div class="card-body">
       <p class="card-text">
-        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!accessToken">Create albums
+        <button (click)="createAlbumsAndMedia()" class="btn btn-primary mb-2" [disabled]="!user">Create albums
           and upload files to Google Photos</button>
       </p>
-      <p class="card-text text-danger" *ngIf="!accessToken">Please enter access token</p>
       <p class="card-text text-danger" *ngIf="uploadingStatus == 'InProgress'">UPLOADING IN PROGRESS</p>
       <p class="card-text text-primary" *ngIf="uploadingStatus == 'Success'">UPLOADING SUCCESSFULLY FINISHED</p>
       <p class="card-text text-danger" *ngIf="uploadingStatus == 'Fail'">UPLOADING FAILED (see the Groups Overview table for details)</p>
     </div>
-  </div>
-</div>
-
-<form [formGroup]="uploadForm">
-  <div class="form-group my-width mx-auto">
-    <label for="accessToken">Access Token (from OAuth 2.0 Playground)</label><br />
-    <input class="form-control" id="accessToken" type="text" formControlName="accessToken" (blur)="saveAccessToken()" />
-  </div>
-</form>
-
-<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto">
-  <div class="card-header">How to get access token to Google Photos</div>
-  <div class="card-body">
-    <p class="card-text">
-      1) Open
-      <a href="https://developers.google.com/oauthplayground/#step1&scopes=https%3A//www.googleapis.com/auth/photoslibrary.appendonly"
-        target="_blank">OAuth 2.0 Playground</a>
-    </p>
-    <h6 class="card-subtitle mb-2 text-muted">On OAuth 2.0 Playground page</h6>
-    <p class="card-text">
-      2) In section "Step 1 Select & authorize APIs", the required scope
-      (<code>https://www.googleapis.com/auth/photoslibrary.appendonly</code>) is already filled in the
-      <kbd>Input your own scopes</kbd> field
-    </p>
-    <p class="card-text">3) Click on <kbd>Authorize APIs</kbd> button</p>
-    <p class="card-text">4) Log in to your Google account</p>
-    <p class="card-text">
-      5) On "Google OAuth 2.0 Playground wants to access your Google Account"
-      screen, click on <kbd>Allow</kbd> button
-    </p>
-    <p class="card-text">
-      6) In section "Step 2 Exchange authorization code for tokens", click on
-      <kbd>Exchange authorization code for tokens</kbd> button
-    </p>
-    <p class="card-text">7) Copy token from <kbd>Access token</kbd> field</p>
-    <h6 class="card-subtitle mb-2 text-muted">On this page</h6>
-    <p class="card-text">
-      8) Paste the token to
-      <kbd>Access Token (from OAuth 2.0 Playground)</kbd> field
-    </p>
   </div>
 </div>
