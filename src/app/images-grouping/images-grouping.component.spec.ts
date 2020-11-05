@@ -20,7 +20,7 @@ describe('ImagesGroupingComponent', () => {
   let mediaServiceSpy: jasmine.SpyObj<any>;
   let albumServiceSpy: jasmine.SpyObj<any>;
   let returnedAlbumId: string;
-  let authServiceSpy: jasmine.SpyObj<any>;
+  let user1: SocialUser;
 
   beforeEach(async(() => {
     const blob = new Blob(['123'], { type: 'text/html' });
@@ -33,16 +33,19 @@ describe('ImagesGroupingComponent', () => {
     mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
     albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     returnedAlbumId = 'abc';
-    authServiceSpy = jasmine.createSpyObj('SocialAuthService', ['signIn', 'signOut', 'authState']);
+    user1 = new SocialUser();
+    user1.id = '123';
+    const authServiceMock = { authState: of(user1) };
 
     TestBed.configureTestingModule({
       declarations: [ImagesGroupingComponent],
       imports: [HttpClientTestingModule, ReactiveFormsModule],
-      providers: [{ provide: NgxPicaService, useValue: picaServiceSpy },
-      { provide: MediaItemService, useValue: mediaServiceSpy },
-      { provide: AlbumService, useValue: albumServiceSpy }
-      , { provide: SocialAuthService, useValue: authServiceSpy }
-    ]
+      providers: [
+        { provide: NgxPicaService, useValue: picaServiceSpy },
+        { provide: MediaItemService, useValue: mediaServiceSpy },
+        { provide: AlbumService, useValue: albumServiceSpy },
+        { provide: SocialAuthService, useValue: authServiceMock }
+      ]
     })
       .compileComponents();
   }));
@@ -50,7 +53,7 @@ describe('ImagesGroupingComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ImagesGroupingComponent);
     component = fixture.componentInstance;
-    // fixture.detectChanges();
+    // fixture.detectChanges(); // ngOnInit
   });
 
   it('should create', () => {
@@ -405,6 +408,12 @@ describe('ImagesGroupingComponent', () => {
       ], 'group name')
     );
     expect(component.getUploadedCount()).toEqual(1);
+  });
+
+  it('should update user and logged in status', () => {
+      fixture.detectChanges();
+      expect(component.user).toEqual(user1);
+      expect(component.loggedIn).toEqual(true);
   });
 
 });
