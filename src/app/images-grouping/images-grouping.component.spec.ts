@@ -8,6 +8,7 @@ import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService, IMediaItem } from './media-item.service';
 import { AlbumService, Album } from './album.service';
+import { SocialAuthService, SocialUser } from 'angularx-social-login';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
@@ -19,6 +20,7 @@ describe('ImagesGroupingComponent', () => {
   let mediaServiceSpy: jasmine.SpyObj<any>;
   let albumServiceSpy: jasmine.SpyObj<any>;
   let returnedAlbumId: string;
+  let authServiceSpy: jasmine.SpyObj<any>;
 
   beforeEach(async(() => {
     const blob = new Blob(['123'], { type: 'text/html' });
@@ -31,13 +33,16 @@ describe('ImagesGroupingComponent', () => {
     mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
     albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     returnedAlbumId = 'abc';
+    authServiceSpy = jasmine.createSpyObj('SocialAuthService', ['signIn', 'signOut', 'authState']);
 
     TestBed.configureTestingModule({
       declarations: [ImagesGroupingComponent],
       imports: [HttpClientTestingModule, ReactiveFormsModule],
       providers: [{ provide: NgxPicaService, useValue: picaServiceSpy },
       { provide: MediaItemService, useValue: mediaServiceSpy },
-      { provide: AlbumService, useValue: albumServiceSpy }]
+      { provide: AlbumService, useValue: albumServiceSpy }
+      , { provide: SocialAuthService, useValue: authServiceSpy }
+    ]
     })
       .compileComponents();
   }));
@@ -45,7 +50,7 @@ describe('ImagesGroupingComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ImagesGroupingComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -203,18 +208,21 @@ describe('ImagesGroupingComponent', () => {
       new MediaItemForGrouping(item3, 1, 0, YesNo.N)
     ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
+    const user1 = new SocialUser();
+    user1.authToken = '123';
+    component.user = user1;
     const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
       expect(albumsSpy.calls.count()).toEqual(2);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Success);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
       expect(uploadsSpy.calls.count()).toEqual(2);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
       expect(batchCreateSpy.calls.count()).toEqual(2);
-      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.accessToken, component.mediaItemsGroups[1].albumId]);
+      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.user.authToken, component.mediaItemsGroups[1].albumId]);
     });
   });
 
@@ -237,13 +245,15 @@ describe('ImagesGroupingComponent', () => {
       new MediaItemForGrouping(item3, 1, 0, YesNo.N)
     ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
-    component.accessToken = '123';
+    const user1 = new SocialUser();
+    user1.authToken = '123';
+    component.user = user1;
     const albumsSpy = albumServiceSpy.albums.and.returnValue(throwError('error'));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
       expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toBeUndefined();
       expect(uploadsSpy.calls.count()).toEqual(0);
@@ -270,17 +280,19 @@ describe('ImagesGroupingComponent', () => {
       new MediaItemForGrouping(item3, 1, 0, YesNo.N)
     ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
-    component.accessToken = '123';
+    const user1 = new SocialUser();
+    user1.authToken = '123';
+    component.user = user1;
     const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(throwError('error'));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
       expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
       expect(uploadsSpy.calls.count()).toEqual(1);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
       expect(batchCreateSpy.calls.count()).toEqual(0);
     });
   });
@@ -303,26 +315,21 @@ describe('ImagesGroupingComponent', () => {
       new MediaItemForGrouping(item3, 1, 0, YesNo.N)
     ], 'group name3');
     component.mediaItemsGroups.push(group1, group2, group3);
-    component.accessToken = '123';
+    const user1 = new SocialUser();
+    user1.authToken = '123';
+    component.user = user1;
     const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
     const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
     const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(throwError('error'));
     component.createAlbumsAndMedia().then(() => {
       expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.accessToken]);
+      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
       expect(uploadsSpy.calls.count()).toEqual(1);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.accessToken]);
+      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
       expect(batchCreateSpy.calls.count()).toEqual(1);
     });
-  });
-
-  it('should save access token', () => {
-    const accessToken = 'abc';
-    component.uploadForm.controls['accessToken'].setValue(accessToken);
-    component.saveAccessToken();
-    expect(component.accessToken).toEqual(accessToken);
   });
 
   it('should return correct uploaded count', () => {
