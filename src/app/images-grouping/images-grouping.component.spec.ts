@@ -55,7 +55,7 @@ describe('ImagesGroupingComponent', () => {
       item: (index: number) => file
     };
     const ngxPicaService = TestBed.inject(NgxPicaService);
-    spyOn(ngxPicaService, 'resizeImages').and.returnValue(of());
+    spyOn(ngxPicaService, 'resizeImages').and.returnValue(of(file));
     component.getMediaItems(fileList);
     expect(ngxPicaService.resizeImages).toHaveBeenCalledTimes(1);
   });
