@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import * as moment from 'moment';
 
@@ -13,47 +13,30 @@ import { GoogleLoginProvider, SocialAuthService, SocialUser } from 'angularx-soc
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
   let fixture: ComponentFixture<ImagesGroupingComponent>;
-  let resizeImagesSpy: jasmine.Spy;
-  let file: File;
   let uploadToken: string;
-  let picaServiceSpy: jasmine.SpyObj<any>;
-  let mediaServiceSpy: jasmine.SpyObj<any>;
-  let albumServiceSpy: jasmine.SpyObj<any>;
   let returnedAlbumId: string;
   let user1: SocialUser;
 
-  beforeEach(async(() => {
-    const blob = new Blob(['123'], { type: 'text/html' });
-    blob['lastModifiedDate'] = '';
-    blob['name'] = 'filename';
-    file = <File>blob;
-    picaServiceSpy = jasmine.createSpyObj('NgxPicaService', ['resizeImages']);
-    resizeImagesSpy = picaServiceSpy.resizeImages.and.returnValue(of(file));
+  beforeEach(() => {
     uploadToken = 'ABC';
-    mediaServiceSpy = jasmine.createSpyObj('MediaItemService', ['uploads', 'batchCreate']);
-    albumServiceSpy = jasmine.createSpyObj('AlbumService', ['albums']);
     returnedAlbumId = 'abc';
     user1 = new SocialUser();
     user1.id = '123';
     const authServiceMock = { authState: of(user1), signIn() {}, signOut() {} };
+    const picaServiceMock = { resizeImages() {} };
 
     TestBed.configureTestingModule({
       declarations: [ImagesGroupingComponent],
       imports: [HttpClientTestingModule, ReactiveFormsModule],
       providers: [
-        { provide: NgxPicaService, useValue: picaServiceSpy },
-        { provide: MediaItemService, useValue: mediaServiceSpy },
-        { provide: AlbumService, useValue: albumServiceSpy },
-        { provide: SocialAuthService, useValue: authServiceMock }
-      ]
+        { provide: NgxPicaService, useValue: picaServiceMock },
+        { provide: SocialAuthService, useValue: authServiceMock } ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ImagesGroupingComponent);
-    component = fixture.componentInstance;
-    // fixture.detectChanges(); // ngOnInit
+      fixture = TestBed.createComponent(ImagesGroupingComponent);
+      component = fixture.componentInstance;
+      // fixture.detectChanges(); // ngOnInit
   });
 
   it('should create', () => {
@@ -61,32 +44,47 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should call resizeImages with correct arguments', () => {
+    const blob = new Blob(['123'], { type: 'text/html' });
+    blob['lastModifiedDate'] = '';
+    blob['name'] = 'filename';
+    const file: File = <File>blob;
     const fileList = {
       0: file,
       1: file,
       length: 2,
       item: (index: number) => file
     };
-
+    const ngxPicaService = TestBed.inject(NgxPicaService);
+    spyOn(ngxPicaService, 'resizeImages').and.returnValue(of());
     component.getMediaItems(fileList);
-    expect(resizeImagesSpy.calls.count()).toEqual(1);
-    expect(resizeImagesSpy.calls.argsFor(0)).toEqual([fileList, component.resizeWidth, component.resizeHeight, component.picaOptions]);
-
+    expect(ngxPicaService.resizeImages).toHaveBeenCalledTimes(1);
   });
 
   it('should call readAsArrayBuffer method of FileReader', () => {
+    const blob = new Blob(['123'], { type: 'text/html' });
+    blob['lastModifiedDate'] = '';
+    blob['name'] = 'filename';
+    const file: File = <File>blob;
     const readAsArrayBufferSpy = spyOn(FileReader.prototype, 'readAsArrayBuffer');
     component.readFileBytes(file);
     expect(readAsArrayBufferSpy).toHaveBeenCalledWith(file);
   });
 
   it('should call readAsDataURL method of FileReader', () => {
+    const blob = new Blob(['123'], { type: 'text/html' });
+    blob['lastModifiedDate'] = '';
+    blob['name'] = 'filename';
+    const file: File = <File>blob;
     const readAsDataURLSpy = spyOn(FileReader.prototype, 'readAsDataURL');
     component.readFileUrl(new FileReader(), file);
     expect(readAsDataURLSpy).toHaveBeenCalledWith(file);
   });
 
   it('should create new media item', () => {
+    const blob = new Blob(['123'], { type: 'text/html' });
+    blob['lastModifiedDate'] = '';
+    blob['name'] = 'filename';
+    const file: File = <File>blob;
     component.createMediaItem(file, new FileReader(), new FileReader());
     expect(component.mediaItems[0].name).toEqual(file.name);
   });
@@ -214,18 +212,20 @@ describe('ImagesGroupingComponent', () => {
     const user1 = new SocialUser();
     user1.authToken = '123';
     component.user = user1;
-    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
-    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
-    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
+    const albumService = TestBed.inject(AlbumService);
+    const mediaItemService = TestBed.inject(MediaItemService);
+    spyOn(albumService,'albums').and.returnValue(of(new Album('', '', returnedAlbumId)));
+    spyOn(mediaItemService,'uploads').and.returnValue(of(uploadToken));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
-      expect(albumsSpy.calls.count()).toEqual(2);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
+      expect(albumService.albums).toHaveBeenCalledTimes(2);
+      expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Success);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
-      expect(uploadsSpy.calls.count()).toEqual(2);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
-      expect(batchCreateSpy.calls.count()).toEqual(2);
-      expect(batchCreateSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.user.authToken, component.mediaItemsGroups[1].albumId]);
+      expect(mediaItemService.uploads).toHaveBeenCalledTimes(2);
+      expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
+      expect(mediaItemService.batchCreate).toHaveBeenCalledTimes(2);
+      expect(mediaItemService.batchCreate).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.user.authToken, component.mediaItemsGroups[1].albumId);
     });
   });
 
@@ -251,16 +251,18 @@ describe('ImagesGroupingComponent', () => {
     const user1 = new SocialUser();
     user1.authToken = '123';
     component.user = user1;
-    const albumsSpy = albumServiceSpy.albums.and.returnValue(throwError('error'));
-    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
-    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
+    const albumService = TestBed.inject(AlbumService);
+    const mediaItemService = TestBed.inject(MediaItemService);
+    spyOn(albumService,'albums').and.returnValue(throwError('error'));
+    spyOn(mediaItemService,'uploads').and.returnValue(of(uploadToken));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
-      expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
+      expect(albumService.albums).toHaveBeenCalledTimes(1);
+      expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toBeUndefined();
-      expect(uploadsSpy.calls.count()).toEqual(0);
-      expect(batchCreateSpy.calls.count()).toEqual(0);
+      expect(mediaItemService.uploads).not.toHaveBeenCalled();
+      expect(mediaItemService.batchCreate).not.toHaveBeenCalled();
     });
   });
 
@@ -286,17 +288,19 @@ describe('ImagesGroupingComponent', () => {
     const user1 = new SocialUser();
     user1.authToken = '123';
     component.user = user1;
-    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
-    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(throwError('error'));
-    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(of(''));
+    const albumService = TestBed.inject(AlbumService);
+    const mediaItemService = TestBed.inject(MediaItemService);
+    spyOn(albumService,'albums').and.returnValue(of(new Album('', '', returnedAlbumId)));
+    spyOn(mediaItemService,'uploads').and.returnValue(throwError('error'));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
     component.createAlbumsAndMedia().then(() => {
-      expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
+      expect(albumService.albums).toHaveBeenCalledTimes(1);
+      expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
-      expect(uploadsSpy.calls.count()).toEqual(1);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
-      expect(batchCreateSpy.calls.count()).toEqual(0);
+      expect(mediaItemService.uploads).toHaveBeenCalledTimes(1);
+      expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
+      expect(mediaItemService.batchCreate).not.toHaveBeenCalled();
     });
   });
 
@@ -321,17 +325,19 @@ describe('ImagesGroupingComponent', () => {
     const user1 = new SocialUser();
     user1.authToken = '123';
     component.user = user1;
-    const albumsSpy = albumServiceSpy.albums.and.returnValue(of(new Album('', '', returnedAlbumId)));
-    const uploadsSpy = mediaServiceSpy.uploads.and.returnValue(of(uploadToken));
-    const batchCreateSpy = mediaServiceSpy.batchCreate.and.returnValue(throwError('error'));
+    const albumService = TestBed.inject(AlbumService);
+    const mediaItemService = TestBed.inject(MediaItemService);
+    spyOn(albumService,'albums').and.returnValue(of(new Album('', '', returnedAlbumId)));
+    spyOn(mediaItemService,'uploads').and.returnValue(of(uploadToken));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(throwError('error'));
     component.createAlbumsAndMedia().then(() => {
-      expect(albumsSpy.calls.count()).toEqual(1);
-      expect(albumsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[0], component.user.authToken]);
+      expect(albumService.albums).toHaveBeenCalledTimes(1);
+      expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
       expect(component.uploadingStatus).toEqual(UploadingStatus.Fail);
       expect(component.mediaItemsGroups[0].albumId).toEqual(returnedAlbumId);
-      expect(uploadsSpy.calls.count()).toEqual(1);
-      expect(uploadsSpy.calls.argsFor(0)).toEqual([component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken]);
-      expect(batchCreateSpy.calls.count()).toEqual(1);
+      expect(mediaItemService.uploads).toHaveBeenCalledTimes(1);
+      expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
+      expect(mediaItemService.batchCreate).toHaveBeenCalledTimes(1);
     });
   });
 
