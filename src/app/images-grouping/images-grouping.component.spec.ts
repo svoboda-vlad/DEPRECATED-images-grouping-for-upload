@@ -2,13 +2,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import * as moment from 'moment';
 
-import { ImagesGroupingComponent, MediaItemsGroup, UploadingStatus } from './images-grouping.component';
+import { googleLoginOptions, ImagesGroupingComponent, MediaItemsGroup, UploadingStatus } from './images-grouping.component';
 import { of, throwError } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MediaItem, MediaItemForGrouping, YesNo, MediaItemService, IMediaItem } from './media-item.service';
 import { AlbumService, Album } from './album.service';
-import { SocialAuthService, SocialUser } from 'angularx-social-login';
+import { GoogleLoginProvider, SocialAuthService, SocialUser } from 'angularx-social-login';
 
 describe('ImagesGroupingComponent', () => {
   let component: ImagesGroupingComponent;
@@ -35,7 +35,7 @@ describe('ImagesGroupingComponent', () => {
     returnedAlbumId = 'abc';
     user1 = new SocialUser();
     user1.id = '123';
-    const authServiceMock = { authState: of(user1) };
+    const authServiceMock = { authState: of(user1), signIn() {}, signOut() {} };
 
     TestBed.configureTestingModule({
       declarations: [ImagesGroupingComponent],
@@ -414,6 +414,21 @@ describe('ImagesGroupingComponent', () => {
       fixture.detectChanges();
       expect(component.user).toEqual(user1);
       expect(component.loggedIn).toEqual(true);
+  });
+
+  it('should call auth service sign in method with correct parameters', () => {
+    const authService = TestBed.inject(SocialAuthService);
+    spyOn(authService, 'signIn');
+    component.signInWithGoogle();
+    expect(authService.signIn).toHaveBeenCalledTimes(1);
+    expect(authService.signIn).toHaveBeenCalledWith(GoogleLoginProvider.PROVIDER_ID, googleLoginOptions);
+  });
+
+  it('should call auth service sign out method', () => {
+    const authService = TestBed.inject(SocialAuthService);
+    spyOn(authService, 'signOut');
+    component.signOut();
+    expect(authService.signOut).toHaveBeenCalledTimes(1);
   });
 
 });

@@ -7,7 +7,7 @@ import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, I
 import { AlbumService } from './album.service';
 import { GoogleLoginProvider, SocialAuthService, SocialUser } from 'angularx-social-login';
 
-const googleLoginOptions = {
+export const googleLoginOptions = {
   scope: 'https://www.googleapis.com/auth/photoslibrary.appendonly'
 }
 
