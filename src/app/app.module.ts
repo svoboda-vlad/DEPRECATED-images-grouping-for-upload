@@ -8,6 +8,7 @@ import { NgxPicaModule } from '@digitalascetic/ngx-pica';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from 'angularx-social-login';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,7 @@ import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from 
         {
           id: GoogleLoginProvider.PROVIDER_ID,
           provider: new GoogleLoginProvider(
-            '401460954055-6enk5fknh1gs1nfkpo0pf03orovdb3vm.apps.googleusercontent.com'
+            environment.GOOGLE_CLIENT_ID
           )
         }
       ]
