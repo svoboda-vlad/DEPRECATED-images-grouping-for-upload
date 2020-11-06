@@ -216,7 +216,7 @@ describe('ImagesGroupingComponent', () => {
     const mediaItemService = TestBed.inject(MediaItemService);
     spyOn(albumService,'albums').and.returnValue(of(new Album('', '', returnedAlbumId)));
     spyOn(mediaItemService,'uploads').and.returnValue(of(uploadToken));
-    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of({}));
     component.createAlbumsAndMedia().then(() => {
       expect(albumService.albums).toHaveBeenCalledTimes(2);
       expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
@@ -226,6 +226,8 @@ describe('ImagesGroupingComponent', () => {
       expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
       expect(mediaItemService.batchCreate).toHaveBeenCalledTimes(2);
       expect(mediaItemService.batchCreate).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, uploadToken, component.user.authToken, component.mediaItemsGroups[1].albumId);
+      expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeTrue();
+      expect(component.mediaItemsGroups[2].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeTrue();
     });
   });
 
@@ -255,7 +257,7 @@ describe('ImagesGroupingComponent', () => {
     const mediaItemService = TestBed.inject(MediaItemService);
     spyOn(albumService,'albums').and.returnValue(throwError('error'));
     spyOn(mediaItemService,'uploads').and.returnValue(of(uploadToken));
-    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of({}));
     component.createAlbumsAndMedia().then(() => {
       expect(albumService.albums).toHaveBeenCalledTimes(1);
       expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
@@ -263,6 +265,8 @@ describe('ImagesGroupingComponent', () => {
       expect(component.mediaItemsGroups[0].albumId).toBeUndefined();
       expect(mediaItemService.uploads).not.toHaveBeenCalled();
       expect(mediaItemService.batchCreate).not.toHaveBeenCalled();
+      expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
+      expect(component.mediaItemsGroups[2].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
     });
   });
 
@@ -292,7 +296,7 @@ describe('ImagesGroupingComponent', () => {
     const mediaItemService = TestBed.inject(MediaItemService);
     spyOn(albumService,'albums').and.returnValue(of(new Album('', '', returnedAlbumId)));
     spyOn(mediaItemService,'uploads').and.returnValue(throwError('error'));
-    spyOn(mediaItemService,'batchCreate').and.returnValue(of(''));
+    spyOn(mediaItemService,'batchCreate').and.returnValue(of({}));
     component.createAlbumsAndMedia().then(() => {
       expect(albumService.albums).toHaveBeenCalledTimes(1);
       expect(albumService.albums).toHaveBeenCalledWith(component.mediaItemsGroups[0], component.user.authToken);
@@ -301,6 +305,8 @@ describe('ImagesGroupingComponent', () => {
       expect(mediaItemService.uploads).toHaveBeenCalledTimes(1);
       expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
       expect(mediaItemService.batchCreate).not.toHaveBeenCalled();
+      expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
+      expect(component.mediaItemsGroups[2].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
     });
   });
 
@@ -338,6 +344,8 @@ describe('ImagesGroupingComponent', () => {
       expect(mediaItemService.uploads).toHaveBeenCalledTimes(1);
       expect(mediaItemService.uploads).toHaveBeenCalledWith(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem, component.user.authToken);
       expect(mediaItemService.batchCreate).toHaveBeenCalledTimes(1);
+      expect(component.mediaItemsGroups[1].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
+      expect(component.mediaItemsGroups[2].mediaItemsForGrouping[0].mediaItem.uploadSuccess).toBeFalse();
     });
   });
 
