@@ -5,6 +5,11 @@ import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-
 import { FormBuilder } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
+import { GoogleLoginProvider, SocialAuthService, SocialUser } from 'angularx-social-login';
+
+export const googleLoginOptions = {
+  scope: 'https://www.googleapis.com/auth/photoslibrary.appendonly'
+}
 
 @Component({
   selector: 'igfu-images-grouping',
@@ -19,13 +24,9 @@ export class ImagesGroupingComponent implements OnInit {
   mediaItemsGroups: IMediaItemsGroup[] = [];
   timeDiffGroup = 1800;
   uploadToken: string;
-  uploadForm = this.fb.group({
-    accessToken: ''
-  });
   inputFilesForm = this.fb.group({
     inputFiles: ''
   });
-  accessToken: string;
   filesLoaded: boolean = false;
   filesCount: number;
   groupsCreated: boolean = false;
@@ -41,13 +42,20 @@ export class ImagesGroupingComponent implements OnInit {
   };
   resizeWidth = 1000;
   resizeHeight = 1000;
+  user: SocialUser;
+  loggedIn: boolean;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
     private mediaItemService: MediaItemService,
-    private albumService: AlbumService) { }
+    private albumService: AlbumService,
+    private authService: SocialAuthService) { }
 
   ngOnInit(): void {
+    this.authService.authState.subscribe((user) => {
+      this.user = user;
+      this.loggedIn = (user != null);
+    });
   }
 
   processFiles(files: FileList): void {
@@ -222,7 +230,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.uploadingStatus = UploadingStatus.InProgress;
     for (const group of this.mediaItemsGroups) {
         if (group.albumId == null) {
-          await this.albumService.albums(group, this.accessToken).toPromise().then(async (album) => {
+          await this.albumService.albums(group, this.user.authToken).toPromise().then(async (album) => {
             group.albumId = album.id;
             await this.createMedia(group);
           })
@@ -239,17 +247,13 @@ export class ImagesGroupingComponent implements OnInit {
   async createMedia(group: IMediaItemsGroup): Promise<void> {
     for (const item of group.mediaItemsForGrouping) {
         if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
-          await this.mediaItemService.uploads(item.mediaItem, this.accessToken).toPromise().then(async (uploadToken: string) => {
-            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.accessToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
+          await this.mediaItemService.uploads(item.mediaItem, this.user.authToken).toPromise().then(async (uploadToken: string) => {
+            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.user.authToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
             .catch(() => this.uploadingStatus = UploadingStatus.Fail);
           })
           .catch(() => this.uploadingStatus = UploadingStatus.Fail);
         }
       }
-  }
-
-  saveAccessToken(): any {
-    this.accessToken = this.uploadForm.get(['accessToken']).value;
   }
 
   removeGroup(gr: IMediaItemsGroup): void {
@@ -286,6 +290,14 @@ export class ImagesGroupingComponent implements OnInit {
       uploadedCount += group.getUploadedCount();
     })
     return uploadedCount;
+  }
+
+  signInWithGoogle(): void {
+    this.authService.signIn(GoogleLoginProvider.PROVIDER_ID, googleLoginOptions);
+  }
+
+  signOut(): void {
+    this.authService.signOut();
   }
 
 }
