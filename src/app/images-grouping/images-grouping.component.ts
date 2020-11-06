@@ -11,6 +11,11 @@ export const googleLoginOptions = {
   scope: 'https://www.googleapis.com/auth/photoslibrary.appendonly'
 }
 
+export const timeDiffDuplicateDefault = 5;
+export const timeDiffGroupDefault = 1800;
+export const resizeWidthDefault = 1000;
+export const resizeHeightDefault = 1000;
+
 @Component({
   selector: 'igfu-images-grouping',
   templateUrl: './images-grouping.component.html',
@@ -20,9 +25,9 @@ export class ImagesGroupingComponent implements OnInit {
 
   mediaItems: IMediaItem[] = [];
   mediaItemsForGrouping: IMediaItemForGrouping[] = [];
-  timeDiffDuplicate = 5;
+  timeDiffDuplicate = timeDiffDuplicateDefault;
   mediaItemsGroups: IMediaItemsGroup[] = [];
-  timeDiffGroup = 1800;
+  timeDiffGroup = timeDiffGroupDefault;
   uploadToken: string;
   inputFilesForm = this.fb.group({
     inputFiles: ''
@@ -40,10 +45,18 @@ export class ImagesGroupingComponent implements OnInit {
       keepAspectRatio: true
     }
   };
-  resizeWidth = 1000;
-  resizeHeight = 1000;
+  resizeWidth = resizeWidthDefault;
+  resizeHeight = resizeHeightDefault;
   user: SocialUser;
   loggedIn: boolean;
+  paramsForm = this.fb.group({
+    timeDiffDuplicate: this.timeDiffDuplicate,
+    timeDiffGroup: this.timeDiffGroup,
+    resizeWidth: this.resizeWidth,
+    resizeHeight: this.resizeHeight
+  });
+  resizeWidthUsed;
+  resizeHeightUsed;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -62,6 +75,7 @@ export class ImagesGroupingComponent implements OnInit {
     if(files.length > 0) {
       this.filesCount = files.length;
       this.emptyArrays();
+      this.setUsedParams();
       this.getMediaItems(files);
     }
   }
@@ -73,6 +87,11 @@ export class ImagesGroupingComponent implements OnInit {
     this.filesLoaded = false;
     this.groupsCreated = false;
     this.uploadingStatus = UploadingStatus.None;
+  }
+
+  private setUsedParams() : void {
+    this.resizeWidthUsed = this.resizeWidth;
+    this.resizeHeightUsed = this.resizeHeight;
   }
 
   getMediaItems(fileList): void {
@@ -106,6 +125,7 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   createGroups(): void {
+    this.emptyArraysExceptMediaItems();
     this.createMediaItemsForGrouping();
     this.calculateTimeDiff();
     this.identifyDuplicates();
@@ -298,6 +318,29 @@ export class ImagesGroupingComponent implements OnInit {
 
   signOut(): void {
     this.authService.signOut();
+  }
+
+  updateTimeDiffDuplicate(): void {
+    this.timeDiffDuplicate = this.paramsForm.get(['timeDiffDuplicate']).value;
+  }
+
+  updateTimeDiffGroup(): void {
+    this.timeDiffGroup = this.paramsForm.get(['timeDiffGroup']).value;
+  }
+
+  updateResizeWidth(): void {
+    this.resizeWidth = this.paramsForm.get(['resizeWidth']).value;
+  }
+
+  updateResizeHeight(): void {
+    this.resizeHeight = this.paramsForm.get(['resizeHeight']).value;
+  }
+
+  private emptyArraysExceptMediaItems() : void {
+    this.mediaItemsForGrouping = [];
+    this.mediaItemsGroups = [];
+    this.groupsCreated = false;
+    this.uploadingStatus = UploadingStatus.None;
   }
 
 }
