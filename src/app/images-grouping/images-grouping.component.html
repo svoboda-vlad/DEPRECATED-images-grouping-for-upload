@@ -27,23 +27,41 @@
     <div class="form-group my-width mx-auto">
       <label for="timeDiffDuplicate">Time diff for duplicates (in sec)</label><br />
       <input class="form-control" id="timeDiffDuplicate" type="text" formControlName="timeDiffDuplicate"/>
+      <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffDuplicate']).errors">
+        Time diff for duplicates (in sec) must be between 1 and 3600.
+      </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="timeDiffGroup">Time diff for groups (in sec)</label><br />
       <input class="form-control" id="timeDiffGroup" type="text" formControlName="timeDiffGroup"/>
+      <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffGroup']).errors">
+        Time diff for groups (in sec) must be between 60 and 86400.
+      </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="resizeWidth">Resize width (px)</label><br />
       <input class="form-control" id="resizeWidth" type="text" formControlName="resizeWidth"/>
+      <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeWidth']).errors">
+        Resize width (px) must be between 1 and 10000.
+      </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="resizeHeight">Resize height (px)</label><br />
       <input class="form-control" id="resizeHeight" type="text" formControlName="resizeHeight"/>
+      <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeHeight']).errors">
+        Resize height (px) must be between 1 and 10000.
+      </div>
     </div>
   </form>
 </div>
 
-<form [formGroup]="inputFilesForm">
+<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="paramsForm.status != 'VALID'">
+  <div class="card-text text-danger">
+    Parameters not valid
+  </div>
+</div>
+
+<form [formGroup]="inputFilesForm" *ngIf="paramsForm.status == 'VALID'">
   <div class="form-group my-width mx-auto">
     <label for="inputFiles">Select images for grouping</label>
     <input class="form-control" id="inputFiles" #file type="file" accept="image/*" (change)="processFiles(file.files)"

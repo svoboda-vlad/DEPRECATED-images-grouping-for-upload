@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { NgxPicaService, NgxPicaErrorInterface } from '@digitalascetic/ngx-pica';
 import { NgxPicaResizeOptionsInterface } from '@digitalascetic/ngx-pica/lib/ngx-pica-resize-options.interface';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
 import { MediaItemService, IMediaItemForGrouping, YesNo, MediaItemForGrouping, IMediaItem, MediaItem } from './media-item.service';
 import { AlbumService } from './album.service';
 import { GoogleLoginProvider, SocialAuthService, SocialUser } from 'angularx-social-login';
@@ -48,10 +48,26 @@ export class ImagesGroupingComponent implements OnInit {
   user: SocialUser;
   loggedIn: boolean;
   paramsForm = this.fb.group({
-    timeDiffDuplicate: timeDiffDuplicateDefault,
-    timeDiffGroup: timeDiffGroupDefault,
-    resizeWidth: resizeWidthDefault,
-    resizeHeight: resizeHeightDefault
+    timeDiffDuplicate: [timeDiffDuplicateDefault, [
+      Validators.required,
+      Validators.min(1),
+      Validators.max(3600)
+    ]],
+    timeDiffGroup: [timeDiffGroupDefault, [
+      Validators.required,
+      Validators.min(60),
+      Validators.max(86400)
+    ]],
+    resizeWidth: [resizeWidthDefault, [
+      Validators.required,
+      Validators.min(1),
+      Validators.max(10000)
+    ]],
+    resizeHeight: [resizeHeightDefault, [
+      Validators.required,
+      Validators.min(1),
+      Validators.max(10000)
+    ]]
   });
   resizeWidth: number;
   resizeHeight: number;
@@ -148,7 +164,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   calculateTimeDiff(): void {
     this.mediaItemsForGrouping.forEach((item) => {
-      if(item.seqNo === 1) {
+      if (item.seqNo === 1) {
         item.timeDiff = 0;
       } else {
         const prevItem = this.mediaItemsForGrouping.find((s) => s.seqNo === (item.seqNo - 1));
@@ -159,8 +175,8 @@ export class ImagesGroupingComponent implements OnInit {
 
   identifyDuplicates(): void {
     this.mediaItemsForGrouping.forEach((item) => {
-      if(item.seqNo > 1) {
-        if(item.timeDiff <= this.timeDiffDuplicate) item.isDuplicate = YesNo.Y;
+      if (item.seqNo > 1) {
+        if (item.timeDiff <= this.timeDiffDuplicate) item.isDuplicate = YesNo.Y;
       }
     });
   }
@@ -180,7 +196,7 @@ export class ImagesGroupingComponent implements OnInit {
         // if a new group is identified, add current group and create a new group
         if (item.timeDiff > this.timeDiffGroup) {
           this.mediaItemsGroups.push(group);
-          group = new MediaItemsGroup(id,item.mediaItem.dateTime, item.mediaItem.dateTime, [item], groupName);
+          group = new MediaItemsGroup(id, item.mediaItem.dateTime, item.mediaItem.dateTime, [item], groupName);
           id++;
         // if existing group, add the file to the group and update end time
         } else {
@@ -210,7 +226,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   updateGroupName(gr: IMediaItemsGroup, newName: string) {
     this.mediaItemsGroups.forEach((group) => {
-      if(group.id === gr.id) {
+      if (group.id === gr.id) {
         group.name = newName;
       }
     });
@@ -218,9 +234,9 @@ export class ImagesGroupingComponent implements OnInit {
 
   changeIsDuplicate(gr: IMediaItemsGroup, item: IMediaItemForGrouping) {
     this.mediaItemsGroups.forEach((group) => {
-      if(group.id === gr.id) {
+      if (group.id === gr.id) {
         group.mediaItemsForGrouping.forEach((mediaItemForGrouping) => {
-          if(mediaItemForGrouping.seqNo === item.seqNo) {
+          if (mediaItemForGrouping.seqNo === item.seqNo) {
             item.isDuplicate = (item.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
           }
         });
@@ -228,14 +244,14 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  private translateWeekdayNamesToCzech(name: string) : string {
-    return name.replace("Monday","pondělí")
-    .replace("Tuesday","úterý")
-    .replace("Wednesday","středa")
-    .replace("Thursday","čtvrtek")
-    .replace("Friday","pátek")
-    .replace("Saturday","sobota")
-    .replace("Sunday","neděle");
+  private translateWeekdayNamesToCzech(name: string): string {
+    return name.replace("Monday", "pondělí")
+      .replace("Tuesday", "úterý")
+      .replace("Wednesday", "středa")
+      .replace("Thursday", "čtvrtek")
+      .replace("Friday", "pátek")
+      .replace("Saturday", "sobota")
+      .replace("Sunday", "neděle");
   }
 
   // async/await + for...of loop to ensure sequential API calls
@@ -243,35 +259,35 @@ export class ImagesGroupingComponent implements OnInit {
   async createAlbumsAndMedia(): Promise<void> {
     this.uploadingStatus = UploadingStatus.InProgress;
     for (const group of this.mediaItemsGroups) {
-        if (group.albumId == null) {
-          await this.albumService.albums(group, this.user.authToken).toPromise().then(async (album) => {
-            group.albumId = album.id;
-            await this.createMedia(group);
-          })
-          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
-        } else {
+      if (group.albumId == null) {
+        await this.albumService.albums(group, this.user.authToken).toPromise().then(async (album) => {
+          group.albumId = album.id;
           await this.createMedia(group);
-        }
-        // when API call error, then brak the loop
-        if (this.uploadingStatus != UploadingStatus.InProgress) break;
+        })
+          .catch(() => this.uploadingStatus = UploadingStatus.Fail);
+      } else {
+        await this.createMedia(group);
+      }
+      // when API call error, then brak the loop
+      if (this.uploadingStatus != UploadingStatus.InProgress) break;
     }
     this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }
 
   async createMedia(group: IMediaItemsGroup): Promise<void> {
     for (const item of group.mediaItemsForGrouping) {
-        if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
-          await this.mediaItemService.uploads(item.mediaItem, this.user.authToken).toPromise().then(async (uploadToken: string) => {
-            await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.user.authToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
+      if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
+        await this.mediaItemService.uploads(item.mediaItem, this.user.authToken).toPromise().then(async (uploadToken: string) => {
+          await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.user.authToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
             .catch(() => this.uploadingStatus = UploadingStatus.Fail);
-          })
+        })
           .catch(() => this.uploadingStatus = UploadingStatus.Fail);
-        }
       }
+    }
   }
 
   removeGroup(gr: IMediaItemsGroup): void {
-    this.mediaItemsGroups.splice(this.mediaItemsGroups.indexOf(gr),1);
+    this.mediaItemsGroups.splice(this.mediaItemsGroups.indexOf(gr), 1);
   }
 
   changeShowGroup(gr: IMediaItemsGroup): void {
@@ -319,7 +335,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.timeDiffGroup = this.paramsForm.get(['timeDiffGroup']).value;
   }
 
-  getParamsResize() : void {
+  getParamsResize(): void {
     this.resizeWidth = this.paramsForm.get(['resizeWidth']).value;
     this.resizeHeight = this.paramsForm.get(['resizeHeight']).value;
   }
@@ -345,7 +361,7 @@ export interface IMediaItemsGroup {
   showOnlyDuplicates: boolean;
 
   getCountWithoutDuplicates(): number;
-  getUploadedCount() : number;
+  getUploadedCount(): number;
 }
 
 export class MediaItemsGroup implements IMediaItemsGroup {
