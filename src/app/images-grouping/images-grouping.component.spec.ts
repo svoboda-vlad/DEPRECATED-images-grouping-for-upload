@@ -448,13 +448,23 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should get correct time diffs from parameters form', () => {
-    const diffDuplicate = 3;
-    const diffGroup = 40;
+    const diffDuplicate = 5;
+    const diffGroup = 3600;
     component.paramsForm.get(['timeDiffDuplicate']).setValue(diffDuplicate);
     component.paramsForm.get(['timeDiffGroup']).setValue(diffGroup);
     component.getParamsTimeDiffs();
     expect(component.timeDiffDuplicate).toEqual(diffDuplicate);
     expect(component.timeDiffGroup).toEqual(diffGroup);
+  });
+
+  it('should get correct resize params from parameters form', () => {
+    const resizeWidth = 1000;
+    const resizeHeight = 1000;
+    component.paramsForm.get(['resizeWidth']).setValue(resizeWidth);
+    component.paramsForm.get(['resizeHeight']).setValue(resizeHeight);
+    component.getParamsResize();
+    expect(component.resizeWidth).toEqual(resizeWidth);
+    expect(component.resizeHeight).toEqual(resizeHeight);
   });
 
 });

@@ -53,8 +53,8 @@ export class ImagesGroupingComponent implements OnInit {
     resizeWidth: resizeWidthDefault,
     resizeHeight: resizeHeightDefault
   });
-  resizeWidthUsed: number;
-  resizeHeightUsed: number;
+  resizeWidth: number;
+  resizeHeight: number;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -73,7 +73,7 @@ export class ImagesGroupingComponent implements OnInit {
     if (files.length > 0) {
       this.filesCount = files.length;
       this.emptyArrays();
-      this.setUsedParams();
+      this.getParamsResize();
       this.getMediaItems(files);
     }
   }
@@ -87,13 +87,8 @@ export class ImagesGroupingComponent implements OnInit {
     this.uploadingStatus = UploadingStatus.None;
   }
 
-  private setUsedParams() : void {
-    this.resizeWidthUsed = this.paramsForm.get(['resizeWidth']).value;
-    this.resizeHeightUsed = this.paramsForm.get(['resizeHeight']).value;
-  }
-
   getMediaItems(fileList): void {
-    this.ngxPicaService.resizeImages(fileList, this.resizeWidthUsed, this.resizeHeightUsed, this.picaOptions).subscribe((file) => {
+    this.ngxPicaService.resizeImages(fileList, this.resizeWidth, this.resizeHeight, this.picaOptions).subscribe((file) => {
       this.readFileBytes(file);
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
@@ -322,6 +317,11 @@ export class ImagesGroupingComponent implements OnInit {
   getParamsTimeDiffs(): void {
     this.timeDiffDuplicate = this.paramsForm.get(['timeDiffDuplicate']).value;
     this.timeDiffGroup = this.paramsForm.get(['timeDiffGroup']).value;
+  }
+
+  getParamsResize() : void {
+    this.resizeWidth = this.paramsForm.get(['resizeWidth']).value;
+    this.resizeHeight = this.paramsForm.get(['resizeHeight']).value;
   }
 
   private emptyArraysExceptMediaItems() : void {
