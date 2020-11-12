@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import * as moment from 'moment';
 
-import { googleLoginOptions, ImagesGroupingComponent, MediaItemsGroup, UploadingStatus } from './images-grouping.component';
+import { googleLoginOptions, ImagesGroupingComponent, MediaItemsGroup, timeDiffDuplicateDefault, timeDiffGroupDefault, UploadingStatus } from './images-grouping.component';
 import { of, throwError } from 'rxjs';
 import { NgxPicaService } from '@digitalascetic/ngx-pica';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -121,6 +121,7 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should correctly identify duplicate', () => {
+    component.timeDiffDuplicate = timeDiffDuplicateDefault;
     component.mediaItemsForGrouping = [];
     const dateString = moment().format('YYYY-MM-DD');
     const dateTime1 = moment(dateString);
@@ -135,6 +136,7 @@ describe('ImagesGroupingComponent', () => {
   });
 
   it('should correctly identify groups', () => {
+    component.timeDiffGroup = timeDiffGroupDefault;
     component.mediaItemsForGrouping = [];
     const mediaItemForGrouping1 = new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0);
     const mediaItemForGrouping2 = new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 2, component.timeDiffGroup + 1);
@@ -443,6 +445,16 @@ describe('ImagesGroupingComponent', () => {
     spyOn(authService, 'signOut');
     component.signOut();
     expect(authService.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('should get correct time diffs from parameters form', () => {
+    const diffDuplicate = 3;
+    const diffGroup = 40;
+    component.paramsForm.get(['timeDiffDuplicate']).setValue(diffDuplicate);
+    component.paramsForm.get(['timeDiffGroup']).setValue(diffGroup);
+    component.getParamsTimeDiffs();
+    expect(component.timeDiffDuplicate).toEqual(diffDuplicate);
+    expect(component.timeDiffGroup).toEqual(diffGroup);
   });
 
 });

@@ -25,9 +25,9 @@ export class ImagesGroupingComponent implements OnInit {
 
   mediaItems: IMediaItem[] = [];
   mediaItemsForGrouping: IMediaItemForGrouping[] = [];
-  timeDiffDuplicate = timeDiffDuplicateDefault;
+  timeDiffDuplicate: number;
   mediaItemsGroups: IMediaItemsGroup[] = [];
-  timeDiffGroup = timeDiffGroupDefault;
+  timeDiffGroup: number;
   uploadToken: string;
   inputFilesForm = this.fb.group({
     inputFiles: ''
@@ -45,18 +45,16 @@ export class ImagesGroupingComponent implements OnInit {
       keepAspectRatio: true
     }
   };
-  resizeWidth = resizeWidthDefault;
-  resizeHeight = resizeHeightDefault;
   user: SocialUser;
   loggedIn: boolean;
   paramsForm = this.fb.group({
-    timeDiffDuplicate: this.timeDiffDuplicate,
-    timeDiffGroup: this.timeDiffGroup,
-    resizeWidth: this.resizeWidth,
-    resizeHeight: this.resizeHeight
+    timeDiffDuplicate: timeDiffDuplicateDefault,
+    timeDiffGroup: timeDiffGroupDefault,
+    resizeWidth: resizeWidthDefault,
+    resizeHeight: resizeHeightDefault
   });
-  resizeWidthUsed;
-  resizeHeightUsed;
+  resizeWidthUsed: number;
+  resizeHeightUsed: number;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -72,7 +70,7 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   processFiles(files: FileList): void {
-    if(files.length > 0) {
+    if (files.length > 0) {
       this.filesCount = files.length;
       this.emptyArrays();
       this.setUsedParams();
@@ -90,12 +88,12 @@ export class ImagesGroupingComponent implements OnInit {
   }
 
   private setUsedParams() : void {
-    this.resizeWidthUsed = this.resizeWidth;
-    this.resizeHeightUsed = this.resizeHeight;
+    this.resizeWidthUsed = this.paramsForm.get(['resizeWidth']).value;
+    this.resizeHeightUsed = this.paramsForm.get(['resizeHeight']).value;
   }
 
   getMediaItems(fileList): void {
-    this.ngxPicaService.resizeImages(fileList, this.resizeWidth, this.resizeHeight, this.picaOptions).subscribe((file) => {
+    this.ngxPicaService.resizeImages(fileList, this.resizeWidthUsed, this.resizeHeightUsed, this.picaOptions).subscribe((file) => {
       this.readFileBytes(file);
     }, (err: NgxPicaErrorInterface) => {
         throw err.err;
@@ -128,6 +126,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.emptyArraysExceptMediaItems();
     this.createMediaItemsForGrouping();
     this.calculateTimeDiff();
+    this.getParamsTimeDiffs();
     this.identifyDuplicates();
     this.identifyGroups();
     this.groupsCreated = true;
@@ -320,20 +319,9 @@ export class ImagesGroupingComponent implements OnInit {
     this.authService.signOut();
   }
 
-  updateTimeDiffDuplicate(): void {
+  getParamsTimeDiffs(): void {
     this.timeDiffDuplicate = this.paramsForm.get(['timeDiffDuplicate']).value;
-  }
-
-  updateTimeDiffGroup(): void {
     this.timeDiffGroup = this.paramsForm.get(['timeDiffGroup']).value;
-  }
-
-  updateResizeWidth(): void {
-    this.resizeWidth = this.paramsForm.get(['resizeWidth']).value;
-  }
-
-  updateResizeHeight(): void {
-    this.resizeHeight = this.paramsForm.get(['resizeHeight']).value;
   }
 
   private emptyArraysExceptMediaItems() : void {
