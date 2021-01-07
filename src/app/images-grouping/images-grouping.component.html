@@ -26,28 +26,28 @@
   <form [formGroup]="paramsForm">
     <div class="form-group my-width mx-auto">
       <label for="timeDiffDuplicate">Time diff for duplicates (in sec)</label><br />
-      <input class="form-control" id="timeDiffDuplicate" type="text" formControlName="timeDiffDuplicate"/>
+      <input class="form-control" id="timeDiffDuplicate" type="text" formControlName="timeDiffDuplicate" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffDuplicate']).errors">
         Time diff for duplicates (in sec) must be between 1 and 3600.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="timeDiffGroup">Time diff for groups (in sec)</label><br />
-      <input class="form-control" id="timeDiffGroup" type="text" formControlName="timeDiffGroup"/>
+      <input class="form-control" id="timeDiffGroup" type="text" formControlName="timeDiffGroup" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffGroup']).errors">
         Time diff for groups (in sec) must be between 60 and 86400.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="resizeWidth">Resize width (px)</label><br />
-      <input class="form-control" id="resizeWidth" type="text" formControlName="resizeWidth"/>
+      <input class="form-control" id="resizeWidth" type="text" formControlName="resizeWidth" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeWidth']).errors">
         Resize width (px) must be between 1 and 10000.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
       <label for="resizeHeight">Resize height (px)</label><br />
-      <input class="form-control" id="resizeHeight" type="text" formControlName="resizeHeight"/>
+      <input class="form-control" id="resizeHeight" type="text" formControlName="resizeHeight" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeHeight']).errors">
         Resize height (px) must be between 1 and 10000.
       </div>
@@ -97,6 +97,7 @@
 
   <div class="my-width-groups mx-auto">
     <div *ngFor="let group of mediaItemsGroups" class="card border p-3 mb-2">
+      <!-- group header -->
       <div class="card-header">
         <button (click)="changeShowGroup(group)"
           class="btn btn-primary mb-2">{{ group.show ? 'Hide images' : 'Show images' }}</button><br />
@@ -113,20 +114,47 @@
         <button (click)="removeGroup(group)" class="btn btn-primary mb-2" *ngIf="group.show">Remove group</button>
       </div>
 
-      <div class="card-body group" *ngIf="group.show">
-        <div *ngFor="let item of group.mediaItemsForGrouping">
-          <div class="file p-3 mb-2"
-            *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
-            {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-            <img [ngClass]="group.largePreview ? 'large-img': 'small-img'" [src]="item.mediaItem.contentUrl" /><br />
-            <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
-              {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
-            <div>
-              {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+      <!-- group images -->
+
+      <!-- bootstrap card -->
+      <div *ngIf="!group.largePreview">
+        <div class="card-body group" *ngIf="group.show">
+          <div *ngFor="let item of group.mediaItemsForGrouping">
+
+            <div class="file p-3 mb-2"
+              *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
+              {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
+              <img [ngClass]="group.largePreview ? 'large-img': 'small-img'" [src]="item.mediaItem.contentUrl" /><br />
+              <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
+                {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
+              <div>
+                {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+              </div>
             </div>
+
           </div>
         </div>
       </div>
+
+      <!-- bootstrap carousel -->
+      <div *ngIf="group.largePreview">
+        <ngb-carousel *ngIf="group.show">
+            <ng-template ngbSlide *ngFor="let item of group.mediaItemsForGrouping">
+              <div class="carousel-caption">
+                <h5>{{ item.mediaItem.dateTime | date: "HH:mm:ss" }}</h5>
+                <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
+                  {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
+                <div>
+                  {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
+                </div>
+              </div>
+              <div class="picsum-img-wrapper" class="file p-3 mb-2">
+                <img [src]="item.mediaItem.contentUrl">
+              </div>
+            </ng-template>
+        </ngb-carousel>
+      </div>
+
     </div>
   </div>
 
