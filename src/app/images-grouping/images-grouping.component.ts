@@ -39,7 +39,7 @@ export class ImagesGroupingComponent implements OnInit {
 
   picaOptions: NgxPicaResizeOptionsInterface = {
     exifOptions: {
-      forceExifOrientation: true
+      forceExifOrientation: false
     },
     aspectRatio: {
       keepAspectRatio: true
