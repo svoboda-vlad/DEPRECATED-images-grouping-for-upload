@@ -21,32 +21,32 @@
   </div>
 </div>
 
-<div>
-  <h3 class="my-width mx-auto">Parameters (grouping, resizing)</h3>
-  <form [formGroup]="paramsForm">
+<div class="my-width mx-auto">
+  <h3>Parameters (grouping, resizing)</h3>
+  <form [formGroup]="paramsForm" class="form-inline">
     <div class="form-group my-width mx-auto">
-      <label for="timeDiffDuplicate">Time diff for duplicates (in sec)</label><br />
+      <label for="timeDiffDuplicate">Time diff for duplicates (in sec)</label>
       <input class="form-control" id="timeDiffDuplicate" type="text" formControlName="timeDiffDuplicate" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffDuplicate']).errors">
         Time diff for duplicates (in sec) must be between 1 and 3600.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
-      <label for="timeDiffGroup">Time diff for groups (in sec)</label><br />
+      <label for="timeDiffGroup">Time diff for groups (in sec)</label>
       <input class="form-control" id="timeDiffGroup" type="text" formControlName="timeDiffGroup" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['timeDiffGroup']).errors">
         Time diff for groups (in sec) must be between 60 and 86400.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
-      <label for="resizeWidth">Resize width (px)</label><br />
+      <label for="resizeWidth">Resize width (px)</label>
       <input class="form-control" id="resizeWidth" type="text" formControlName="resizeWidth" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeWidth']).errors">
         Resize width (px) must be between 1 and 10000.
       </div>
     </div>
     <div class="form-group my-width mx-auto">
-      <label for="resizeHeight">Resize height (px)</label><br />
+      <label for="resizeHeight">Resize height (px)</label>
       <input class="form-control" id="resizeHeight" type="text" formControlName="resizeHeight" />
       <div class="card-text text-danger" *ngIf="paramsForm.get(['resizeHeight']).errors">
         Resize height (px) must be between 1 and 10000.
@@ -69,7 +69,7 @@
   </div>
 </form>
 
-<div class="card p-3 mb-2 bg-light text-dark my-width mx-auto" *ngIf="filesCount">
+<div class="card p-3 mb-2 text-dark my-width mx-auto" *ngIf="filesCount">
   <div class="card-body">
     <p class="card-text text-danger" *ngIf="mediaItems.length != filesCount">Resizing in progress
       ({{ mediaItems.length }} of {{ filesCount }})</p>
@@ -124,7 +124,7 @@
             <div class="file p-3 mb-2"
               *ngIf="(group.showOnlyDuplicates && item.isDuplicate == 'Y') || (!group.showOnlyDuplicates && item.isDuplicate == 'N')">
               {{ item.mediaItem.dateTime | date: "HH:mm:ss" }}<br />
-              <img [ngClass]="group.largePreview ? 'large-img': 'small-img'" [src]="item.mediaItem.contentUrl" /><br />
+              <img class='small-img' [src]="item.mediaItem.contentUrl" /><br />
               <button (click)="changeIsDuplicate(group, item)" class="btn btn-primary mb-2">
                 {{ item.isDuplicate === "Y" ? "Add" : "Remove" }}</button>
               <div>
@@ -137,7 +137,7 @@
       </div>
 
       <!-- bootstrap carousel -->
-      <div *ngIf="group.largePreview">
+      <div *ngIf="group.largePreview" class="carousel-width">
         <ngb-carousel *ngIf="group.show">
             <ng-template ngbSlide *ngFor="let item of group.mediaItemsForGrouping">
               <div class="carousel-caption">
@@ -149,7 +149,7 @@
                 </div>
               </div>
               <div class="picsum-img-wrapper" class="file p-3 mb-2">
-                <img [src]="item.mediaItem.contentUrl">
+                <img class ="carousel-width" [src]="item.mediaItem.contentUrl">
               </div>
             </ng-template>
         </ngb-carousel>

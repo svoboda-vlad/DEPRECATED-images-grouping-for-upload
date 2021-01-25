@@ -381,8 +381,8 @@ export class MediaItemsGroup implements IMediaItemsGroup {
     this.endTime = endTime;
     this.mediaItemsForGrouping = mediaItemsForGrouping;
     this.name = name;
-    this.show = false;
-    this.largePreview = false;
+    this.show = true;
+    this.largePreview = true;
     this.showOnlyDuplicates = false;
   }
 
