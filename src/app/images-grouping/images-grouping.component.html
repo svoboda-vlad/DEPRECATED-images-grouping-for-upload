@@ -137,8 +137,8 @@
       </div>
 
       <!-- bootstrap carousel -->
-      <div *ngIf="group.largePreview" class="carousel-width">
-        <ngb-carousel *ngIf="group.show">
+      <div *ngIf="group.largePreview" class="carousel-div">
+        <ngb-carousel *ngIf="group.show" data-interval="false">
             <ng-template ngbSlide *ngFor="let item of group.mediaItemsForGrouping">
               <div class="carousel-caption">
                 <h5>{{ item.mediaItem.dateTime | date: "HH:mm:ss" }}</h5>
@@ -148,8 +148,8 @@
                   {{ item.mediaItem.uploadSuccess ? "Uploaded" : "Not uploaded" }}
                 </div>
               </div>
-              <div class="picsum-img-wrapper" class="file p-3 mb-2">
-                <img class ="carousel-width" [src]="item.mediaItem.contentUrl">
+              <div class="picsum-img-wrapper">
+                <img [src]="item.mediaItem.contentUrl" class="carousel-img">
               </div>
             </ng-template>
         </ngb-carousel>
