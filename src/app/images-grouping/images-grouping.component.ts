@@ -11,7 +11,7 @@ export const googleLoginOptions = {
   scope: 'https://www.googleapis.com/auth/photoslibrary.appendonly'
 }
 
-export const timeDiffDuplicateDefault = 5;
+export const timeDiffDuplicateDefault = 0;
 export const timeDiffGroupDefault = 1800;
 export const resizeWidthDefault = 1000;
 export const resizeHeightDefault = 1000;
@@ -50,7 +50,7 @@ export class ImagesGroupingComponent implements OnInit {
   paramsForm = this.fb.group({
     timeDiffDuplicate: [timeDiffDuplicateDefault, [
       Validators.required,
-      Validators.min(1),
+      Validators.min(0),
       Validators.max(3600)
     ]],
     timeDiffGroup: [timeDiffGroupDefault, [
