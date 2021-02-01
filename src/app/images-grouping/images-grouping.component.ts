@@ -11,8 +11,8 @@ export const googleLoginOptions = {
   scope: 'https://www.googleapis.com/auth/photoslibrary.appendonly'
 }
 
-export const timeDiffDuplicateDefault = 5;
-export const timeDiffGroupDefault = 1800;
+export const timeDiffDuplicateDefault = 0;
+export const timeDiffGroupDefault = 7200;
 export const resizeWidthDefault = 1000;
 export const resizeHeightDefault = 1000;
 
@@ -50,7 +50,7 @@ export class ImagesGroupingComponent implements OnInit {
   paramsForm = this.fb.group({
     timeDiffDuplicate: [timeDiffDuplicateDefault, [
       Validators.required,
-      Validators.min(1),
+      Validators.min(0),
       Validators.max(3600)
     ]],
     timeDiffGroup: [timeDiffGroupDefault, [
@@ -71,6 +71,7 @@ export class ImagesGroupingComponent implements OnInit {
   });
   resizeWidth: number;
   resizeHeight: number;
+  paramsFormShow: boolean = true;
 
   constructor(private ngxPicaService: NgxPicaService,
     private fb: FormBuilder,
@@ -101,6 +102,7 @@ export class ImagesGroupingComponent implements OnInit {
     this.filesLoaded = false;
     this.groupsCreated = false;
     this.uploadingStatus = UploadingStatus.None;
+    this.paramsFormShow = false;
   }
 
   getMediaItems(fileList): void {
@@ -211,10 +213,10 @@ export class ImagesGroupingComponent implements OnInit {
     });
   }
 
-  getUniqueMediaItemsCount(): number {
+  getMediaItemsCount(): number {
     let uniqueItemsCount = 0;
     this.mediaItemsGroups.forEach((group) => {
-      uniqueItemsCount += group.getCountWithoutDuplicates();
+      uniqueItemsCount += group.mediaItemsForGrouping.length;
     })
     return uniqueItemsCount;
   }
@@ -228,18 +230,6 @@ export class ImagesGroupingComponent implements OnInit {
     this.mediaItemsGroups.forEach((group) => {
       if (group.id === gr.id) {
         group.name = newName;
-      }
-    });
-  }
-
-  changeIsDuplicate(gr: IMediaItemsGroup, item: IMediaItemForGrouping) {
-    this.mediaItemsGroups.forEach((group) => {
-      if (group.id === gr.id) {
-        group.mediaItemsForGrouping.forEach((mediaItemForGrouping) => {
-          if (mediaItemForGrouping.seqNo === item.seqNo) {
-            item.isDuplicate = (item.isDuplicate === YesNo.Y) ? YesNo.N : YesNo.Y;
-          }
-        });
       }
     });
   }
@@ -268,15 +258,15 @@ export class ImagesGroupingComponent implements OnInit {
       } else {
         await this.createMedia(group);
       }
-      // when API call error, then brak the loop
+      // when API call error, then break the loop
       if (this.uploadingStatus != UploadingStatus.InProgress) break;
     }
-    this.uploadingStatus = (this.getUniqueMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
+    this.uploadingStatus = (this.getMediaItemsCount() == this.getUploadedCount()) ? UploadingStatus.Success : UploadingStatus.Fail;
   }
 
   async createMedia(group: IMediaItemsGroup): Promise<void> {
     for (const item of group.mediaItemsForGrouping) {
-      if (item.isDuplicate === YesNo.N && !item.mediaItem.uploadSuccess) {
+      if (!item.mediaItem.uploadSuccess) {
         await this.mediaItemService.uploads(item.mediaItem, this.user.authToken).toPromise().then(async (uploadToken: string) => {
           await this.mediaItemService.batchCreate(item.mediaItem, uploadToken, this.user.authToken, group.albumId).toPromise().then(() => item.mediaItem.uploadSuccess = true)
             .catch(() => this.uploadingStatus = UploadingStatus.Fail);
@@ -302,14 +292,6 @@ export class ImagesGroupingComponent implements OnInit {
     this.mediaItemsGroups.forEach((group) => {
       if (group.id === gr.id) {
         group.largePreview = !group.largePreview;
-      }
-    });
-  }
-
-  changeShowOnlyDuplicates(gr: IMediaItemsGroup): void {
-    this.mediaItemsGroups.forEach((group) => {
-      if (group.id === gr.id) {
-        group.showOnlyDuplicates = !group.showOnlyDuplicates;
       }
     });
   }
@@ -347,6 +329,18 @@ export class ImagesGroupingComponent implements OnInit {
     this.uploadingStatus = UploadingStatus.None;
   }
 
+  removeItemFromGroup(gr: IMediaItemsGroup, item: IMediaItemForGrouping): void {
+    this.mediaItemsGroups.forEach((group) => {
+      if (group.id === gr.id) {
+        group.mediaItemsForGrouping.splice(group.mediaItemsForGrouping.indexOf(item), 1);
+      }
+    });
+  }
+
+  changeParamsFormShow() {
+    this.paramsFormShow ? this.paramsFormShow = false : this.paramsFormShow = true;
+  }
+
 }
 
 export interface IMediaItemsGroup {
@@ -358,9 +352,7 @@ export interface IMediaItemsGroup {
   albumId?: string;
   show: boolean;
   largePreview: boolean;
-  showOnlyDuplicates: boolean;
 
-  getCountWithoutDuplicates(): number;
   getUploadedCount(): number;
 }
 
@@ -373,7 +365,6 @@ export class MediaItemsGroup implements IMediaItemsGroup {
   albumId?: string;
   show: boolean;
   largePreview: boolean;
-  showOnlyDuplicates: boolean;
 
   constructor(id: number, startTime: moment.Moment, endTime: moment.Moment, mediaItemsForGrouping: IMediaItemForGrouping[], name: string) {
     this.id = id;
@@ -381,13 +372,8 @@ export class MediaItemsGroup implements IMediaItemsGroup {
     this.endTime = endTime;
     this.mediaItemsForGrouping = mediaItemsForGrouping;
     this.name = name;
-    this.show = false;
-    this.largePreview = false;
-    this.showOnlyDuplicates = false;
-  }
-
-  getCountWithoutDuplicates(): number {
-    return this.mediaItemsForGrouping.filter((item) => item.isDuplicate === YesNo.N).length;
+    this.show = true;
+    this.largePreview = true;
   }
 
   getUploadedCount() : number {

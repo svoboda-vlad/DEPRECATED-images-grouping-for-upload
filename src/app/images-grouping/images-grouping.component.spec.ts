@@ -161,7 +161,7 @@ describe('ImagesGroupingComponent', () => {
         new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 2, 0, YesNo.Y)
       ], 'group name')
     );
-    expect(component.getUniqueMediaItemsCount()).toEqual(1);
+    expect(component.getMediaItemsCount()).toEqual(2);
   });
 
   it('should return correct day difference', () => {
@@ -180,17 +180,6 @@ describe('ImagesGroupingComponent', () => {
     );
     component.updateGroupName(component.mediaItemsGroups[0], newGroupName);
     expect(component.mediaItemsGroups[0].name).toEqual(newGroupName);
-  });
-
-  it('should change duplicate', () => {
-    component.mediaItemsGroups = [];
-    component.mediaItemsGroups.push(
-      new MediaItemsGroup(1, moment(), moment(), [
-        new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
-      ], 'group name')
-    );
-    component.changeIsDuplicate(component.mediaItemsGroups[0], component.mediaItemsGroups[0].mediaItemsForGrouping[0]);
-    expect(component.mediaItemsGroups[0].mediaItemsForGrouping[0].isDuplicate).toEqual(YesNo.Y);
   });
 
   it('should call APIs - albums, uploads, batchCreate - with success and update uploading status and album id', () => {
@@ -401,17 +390,6 @@ describe('ImagesGroupingComponent', () => {
     expect(component.mediaItemsGroups[0].largePreview).toEqual(true);
   });
 
-  it('should change group show only duplicates value', () => {
-    component.mediaItemsGroups = [];
-    const group = new MediaItemsGroup(1, moment(), moment(), [
-      new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
-    ], 'group name');
-    group.showOnlyDuplicates = false;
-    component.mediaItemsGroups.push(group);
-    component.changeShowOnlyDuplicates(component.mediaItemsGroups[0]);
-    expect(component.mediaItemsGroups[0].showOnlyDuplicates).toEqual(true);
-  });
-
   it('should return correct uploaded items count', () => {
     component.mediaItemsGroups = [];
     const mediaItem1 = new MediaItem('name A', moment(), '123', '321');
@@ -465,6 +443,22 @@ describe('ImagesGroupingComponent', () => {
     component.getParamsResize();
     expect(component.resizeWidth).toEqual(resizeWidth);
     expect(component.resizeHeight).toEqual(resizeHeight);
+  });
+
+  it('should remove item from group', () => {
+    component.mediaItemsGroups = [];
+    component.mediaItemsGroups.push(
+      new MediaItemsGroup(1, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name A', moment(), '123', '321'), 1, 0, YesNo.N)
+      ], 'group name 1'),
+      new MediaItemsGroup(2, moment(), moment(), [
+        new MediaItemForGrouping(new MediaItem('name B', moment(), '456', '654'), 1, 0, YesNo.N),
+        new MediaItemForGrouping(new MediaItem('name C', moment(), '789', '987'), 1, 0, YesNo.Y),
+      ], 'group name 2')
+    );
+    const originalLength = component.mediaItemsGroups[1].mediaItemsForGrouping.length;
+    component.removeItemFromGroup(component.mediaItemsGroups[1], component.mediaItemsGroups[1].mediaItemsForGrouping[0]);
+    expect(component.mediaItemsGroups[1].mediaItemsForGrouping.length).toEqual(originalLength - 1);
   });
 
 });
