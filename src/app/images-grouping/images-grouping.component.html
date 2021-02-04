@@ -135,7 +135,7 @@
 
       <!-- bootstrap carousel -->
       <div *ngIf="group.largePreview" class="carousel-div">
-        <ngb-carousel *ngIf="group.show" data-interval="false">
+        <ngb-carousel *ngIf="group.show" [interval]="false">
             <ng-template ngbSlide *ngFor="let item of group.mediaItemsForGrouping">
               <div class="carousel-caption">
                 <span class="bg-light text-primary m-2 p-2">{{ item.mediaItem.dateTime | date: "HH:mm:ss" }}
