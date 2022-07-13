@@ -26,7 +26,7 @@
     "bootstrap": "^4.4.0",
     "bootstrap-scss": "^4.5.2",
     "exifr": "^7.0.0",
-    "moment": "^2.27.0",
+    "moment": "^2.29.4",
     "pica": "^6.1.0",
     "rxjs": "~6.5.4",
     "tslib": "^2.0.0",
